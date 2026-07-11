@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Generator Konsul WA UGD - Mobile Friendly</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #111b21;
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .header {
+            border-bottom: 2px solid #e9edef;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            color: #008069;
+            font-weight: 700;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #3b4a54;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px; /* Lebih besar agar mudah di-tap di HP */
+            border: 1px solid #a1b0b9;
+            border-radius: 8px;
+            font-size: 1rem; /* Mencegah auto-zoom di iOS (minimal 16px/1rem) */
+            outline: none;
+            transition: border-color 0.2s;
+            background-color: #fff;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #008069;
+            background-color: #fff;
+        }
+        .form-group textarea {
+            resize: none;
+            height: 65px;
+        }
+        
+        /* Tabel Input Tanda Vital - Dioptimalkan untuk HP */
+        .vitals-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3b4a54;
+            margin-bottom: 6px;
+            margin-top: 14px;
+        }
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 Kolom sejajar di layar HP */
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e9edef;
+            margin-bottom: 16px;
+        }
+        .vital-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .vital-input-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #667781;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .vital-input-group input {
+            padding: 10px;
+            font-size: 1rem; /* Mencegah auto-zoom */
+            border: 1px solid #a1b0b9;
+            border-radius: 6px;
+        }
+
+        /* Tombol Aksi */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px; /* Nyaman untuk jempol */
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+        .btn-primary {
+            background-color: #008069;
+            color: white;
+        }
+        .btn-primary:active {
+            background-color: #005e4d;
+        }
+        .btn-secondary {
+            background-color: #e9edef;
+            color: #3b4a54;
+        }
+        .btn-secondary:active {
+            background-color: #c1c7cb;
+        }
+        
+        /* Preview Chat Box */
+        .preview-box {
+            background-color: #efeae2;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 14px;
+            border: 1px solid #dadbdc;
+        }
+        .preview-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #667781;
+            margin-bottom: 4px;
+        }
+        .bubble {
+            background-color: #d9fdd3;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            white-space: pre-wrap;
+            line-height: 1.4;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.1);
+            color: #111b21;
+            word-break: break-word;
+        }
+        
+        /* Notifikasi Sukses Salin */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: rgba(50, 50, 50, 0.9);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            transition: transform 0.2s ease;
+            z-index: 1000;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#008069"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.294 1.48 4.925 1.481 5.429 0 9.85-4.414 9.853-9.84.002-2.63-1.023-5.101-2.885-6.963C16.673 1.97 14.202.947 11.58.947c-5.429 0-9.849 4.415-9.853 9.841-.002 1.712.455 3.382 1.32 4.874L2 21.082l5.064-1.327z"/></svg>
+        <h2>Generator Konsul WA UGD (HP)</h2>
+    </div>
+
+    <div class="form-group">
+        <label for="nama">Nama Pasien</label>
+        <input type="text" id="nama" placeholder="Contoh: Tn. Ali" oninput="updatePreview()">
+    </div>
+
+    <div class="form-group">
+        <label for="keluhan">Keluhan Utama</label>
+        <textarea id="keluhan" placeholder="Contoh: Sesak napas mendadak sejak 30 menit lalu" oninput="updatePreview()"></textarea>
+    </div>
+
+    <div class="vitals-title">Tanda Vital (Tabel Input)</div>
+    <div class="vitals-grid">
+        <div class="vital-input-group">
+            <label for="td">TD (mmHg)</label>
+            <input type="text" id="td" placeholder="120/80" oninput="updatePreview()">
+        </div>
+        <div class="vital-input-group">
+            <label for="nadi">Nadi (x/mnt)</label>
+            <input type="text" id="nadi" placeholder="88" oninput="updatePreview()">
+        </div>
+        <div class="vital-input-group">
+            <label for="rr">RR (x/mnt)</label>
+            <input type="text" id="rr" placeholder="20" oninput="updatePreview()">
+        </div>
+        <div class="vital-input-group">
+            <label for="suhu">Suhu (°C)</label>
+            <input type="text" id="suhu" placeholder="36.5" oninput="updatePreview()">
+        </div>
+        <div class="vital-input-group">
+            <label for="spo2">SpO2 (%)</label>
+            <input type="text" id="spo2" placeholder="98" oninput="updatePreview()">
+        </div>
+        <div class="vital-input-group">
+            <label for="lainnya">Lain-lain / GCS</label>
+            <input type="text" id="lainnya" placeholder="GCS E4V5M6" oninput="updatePreview()">
+        </div>
+    </div>
+
+    <div class="preview-title">Preview Pesan WA</div>
+    <div class="preview-box">
+        <div class="bubble" id="whatsappBubble"></div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-secondary" onclick="copyText()">📋 Salin Teks</button>
+        <button class="btn btn-primary" onclick="sendWhatsApp()">💬 Kirim WA</button>
+    </div>
+</div>
+
+<div class="toast" id="toast">Teks berhasil disalin!</div>
+
+<script>
+    function generateTemplate() {
+        const nama = document.getElementById('nama').value.trim() || '-';
+        const keluhan = document.getElementById('keluhan').value.trim() || '-';
+        
+        const td = document.getElementById('td').value.trim();
+        const nadi = document.getElementById('nadi').value.trim();
+        const rr = document.getElementById('rr').value.trim();
+        const suhu = document.getElementById('suhu').value.trim();
+        const spo2 = document.getElementById('spo2').value.trim();
+        const lainnya = document.getElementById('lainnya').value.trim();
+
+        let kondisiArr = [];
+        if (td) kondisiArr.push(`TD ${td} mmHg`);
+        if (nadi) kondisiArr.push(`Nadi ${nadi} x/m`);
+        if (rr) kondisiArr.push(`RR ${rr} x/m`);
+        if (suhu) kondisiArr.push(`Suhu ${suhu} °C`);
+        if (spo2) kondisiArr.push(`SpO2 ${spo2}%`);
+        if (lainnya) kondisiArr.push(lainnya);
+
+        const kondisiText = kondisiArr.length > 0 ? kondisiArr.join(', ') : '-';
+
+        return `Dok, izin konsul pasien UGD:
+` +
+               `*Nama:* ${nama}
+` +
+               `*Keluhan:* ${keluhan}
+` +
+               `*Kondisi saat ini:* ${kondisiText}
+
+` +
+               `Mohon saran dan arahannya, Dok. Terima kasih.`;
+    }
+
+    function updatePreview() {
+        const text = generateTemplate();
+        document.getElementById('whatsappBubble').innerText = text;
+    }
+
+    function copyText() {
+        const text = generateTemplate();
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        });
+    }
+
+    function sendWhatsApp() {
+        const text = generateTemplate();
+        const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+    }
+
+    // Initialize preview
+    updatePreview();
+</script>
+
+</body>
+</html>
