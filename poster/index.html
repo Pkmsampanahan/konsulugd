@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Poster QR UGD Sampanahan</title>
+    <!-- Menggunakan pustaka QRCode.js untuk generate QR otomatis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        
+        /* Pengaturan Layout untuk Layar Monitor */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #525659;
+            margin: 0;
+            padding: 20px 0 40px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Toolbar Pemilih (Hanya Tampil di Layar Monitor) */
+        .print-toolbar {
+            background: #ffffff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            z-index: 100;
+        }
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .print-toolbar label {
+            font-weight: bold;
+            color: #3b4a54;
+            font-size: 0.95rem;
+        }
+        .print-toolbar select {
+            padding: 8px 16px;
+            font-size: 0.95rem;
+            border-radius: 20px;
+            border: 2px solid #0277bd;
+            outline: none;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: #fff;
+        }
+        .print-btn {
+            background-color: #008069;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .print-btn:hover {
+            background-color: #005e4d;
+        }
+
+        /* =============== KANVAS WADAH UTAMA KERTAS =============== */
+        .paper-page {
+            background: #ffffff;
+            width: 210mm;
+            height: 297mm;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s ease-in-out;
+            padding: 10mm; /* Ruang aman margin kertas */
+            
+            /* Default: 1 Poster per halaman */
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+            gap: 0;
+        }
+
+        /* Variasi Ukuran Kertas Fisik (Page Size) */
+        .paper-page.page-a4 { width: 210mm; height: 297mm; }
+        .paper-page.page-f4 { width: 215mm; height: 330mm; }
+        .paper-page.page-a5 { width: 148mm; height: 210mm; }
+
+        /* Variasi Layout Grid Multi-Poster */
+        .paper-page.layout-2 {
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15mm;
+        }
+        .paper-page.layout-4 {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 10mm;
+        }
+
+        /* =============== DESAIN KOTAK POSTER INDIVIDU =============== */
+        .poster-canvas {
+            background: #ffffff;
+            width: 100%;
+            height: 100%;
+            padding: 15mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            border: 5px solid #008069;
+            overflow: hidden;
+        }
+
+        /* Aksen Border Ganda */
+        .poster-inner-border {
+            position: absolute;
+            top: 4mm; left: 4mm; right: 4mm; bottom: 4mm;
+            border: 2px solid #0277bd;
+            pointer-events: none;
+        }
+
+        /* Gaya Konten */
+        .header-section { text-align: center; width: 100%; }
+        .header-section h1 {
+            color: #d32f2f; font-size: 2.4rem; margin: 0 0 5px 0; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .header-section h2 { color: #111b21; font-size: 1.5rem; margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; }
+        .header-section p {
+            color: #54656f; font-size: 1.05rem; margin: 0; font-weight: 600;
+            border-bottom: 3px double #a1b0b9; padding-bottom: 10px;
+        }
+
+        .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .qr-wrapper {
+            background: #ffffff; padding: 20px; border-radius: 16px;
+            border: 4px solid #008069; box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+        }
+        .qr-url-text {
+            font-family: "Courier New", Courier, monospace; font-size: 0.9rem; font-weight: bold;
+            color: #0277bd; margin-top: 12px; background: #e1f5fe; padding: 5px 12px; border-radius: 6px;
+        }
+
+        .instruction-section { background: #f8f9fa; border-left: 6px solid #0277bd; padding: 15px 20px; border-radius: 6px; width: 100%; }
+        .instruction-section h3 { margin: 0 0 8px 0; color: #111b21; font-size: 1.2rem; font-weight: 700; }
+        .instruction-section ol { margin: 0; padding-left: 18px; }
+        .instruction-section li { font-size: 1rem; color: #3b4a54; margin-bottom: 6px; line-height: 1.4; font-weight: 600; }
+
+        .footer-section { text-align: center; font-size: 0.85rem; color: #7a8f9d; font-weight: bold; width: 100%; border-top: 1px solid #e9edef; padding-top: 8px; }
+
+        /* =================== OTOMATISASI SKALA (2 & 4 POSTER) =================== */
+        /* Penyesuaian jika isi 2 poster dalam 1 lembar */
+        .paper-page.layout-2 .poster-canvas { padding: 10mm; border-width: 4px; }
+        .paper-page.layout-2 .header-section h1 { font-size: 1.8rem; }
+        .paper-page.layout-2 .header-section h2 { font-size: 1.2rem; }
+        .paper-page.layout-2 .header-section p { font-size: 0.9rem; }
+        .paper-page.layout-2 .instruction-section { padding: 10px 15px; }
+        .paper-page.layout-2 .instruction-section h3 { font-size: 1rem; }
+        .paper-page.layout-2 .instruction-section li { font-size: 0.85rem; }
+
+        /* Penyesuaian jika isi 4 poster dalam 1 lembar (Ukuran Kantong/Mini) */
+        .paper-page.layout-4 .poster-canvas { padding: 6mm; border-width: 3px; }
+        .paper-page.layout-4 .poster-inner-border { top: 2mm; left: 2mm; right: 2mm; bottom: 2mm; }
+        .paper-page.layout-4 .header-section h1 { font-size: 1.2rem; }
+        .paper-page.layout-4 .header-section h2 { font-size: 0.9rem; margin-bottom: 4px; }
+        .paper-page.layout-4 .header-section p { font-size: 0.7rem; padding-bottom: 5px; }
+        .paper-page.layout-4 .qr-wrapper { padding: 10px; border-width: 2px; border-radius: 8px; }
+        .paper-page.layout-4 .qr-url-text { font-size: 0.65rem; margin-top: 6px; padding: 2px 6px; }
+        .paper-page.layout-4 .instruction-section { padding: 6px 10px; border-left-width: 4px; }
+        .paper-page.layout-4 .instruction-section h3 { font-size: 0.8rem; margin-bottom: 3px; }
+        .paper-page.layout-4 .instruction-section li { font-size: 0.65rem; margin-bottom: 2px; line-height: 1.2; }
+        .paper-page.layout-4 .footer-section { font-size: 0.6rem; padding-top: 4px; }
+
+        /* =================== ATURAN KHUSUS PRINT CETAK =================== */
+        @media print {
+            body { background-color: #ffffff; margin: 0; padding: 0; }
+            .print-toolbar { display: none !important; }
+            .paper-page { box-shadow: none !important; margin: 0 !important; }
+            .paper-page.page-a4 { width: 210mm; height: 297mm; }
+            .paper-page.page-f4 { width: 215mm; height: 330mm; }
+            .paper-page.page-a5 { width: 148mm; height: 210mm; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Menu Pemilih (Otomatis Tersembunyi saat di-print) -->
+<div class="print-toolbar">
+    <div class="toolbar-group">
+        <label for="paperSizeSelect">📐 Kertas Fisik:</label>
+        <select id="paperSizeSelect" onchange="renderLayout()">
+            <option value="page-a4">A4</option>
+            <option value="page-f4">F4 / Folio</option>
+            <option value="page-a5">A5</option>
+        </select>
+    </div>
+    
+    <div class="toolbar-group">
+        <label for="layoutSelect">🎴 Jumlah Poster Per Lembar:</label>
+        <select id="layoutSelect" onchange="renderLayout()">
+            <option value="1">1 Lembar = 1 Poster Besar</option>
+            <option value="2">1 Lembar = 2 Poster (Atas & Bawah)</option>
+            <option value="4">1 Lembar = 4 Poster (Grid Mini)</option>
+        </select>
+    </div>
+    
+    <button class="print-btn" onclick="window.print()">🖨️ Mulai Cetak</button>
+</div>
+
+<!-- Wadah Kertas Utama -->
+<div class="paper-page page-a4" id="paperPage">
+    <!-- Konten Poster akan di-render dinamis oleh JavaScript di sini -->
+</div>
+
+<script>
+    // Fungsi dasar cetakan template HTML Poster
+    function getPosterTemplate(index) {
+        return `
+            <div class="poster-canvas">
+                <div class="poster-inner-border"></div>
+                <div class="header-section">
+                    <h1>ASISTEN DIGITAL UGD</h1>
+                    <h2>Puskesmas Sampanahan</h2>
+                    <p>Aplikasi Generator Teks Konsul Dokter & Rujukan RS</p>
+                </div>
+                <div class="qr-section">
+                    <div class="qr-wrapper">
+                        <div id="qrcode_${index}"></div>
+                    </div>
+                    <div class="qr-url-text">pkmsampanahan.github.io/konsulugd/</div>
+                </div>
+                <div class="instruction-section">
+                    <h3>Langkah Cepat Penggunaan:</h3>
+                    <ol>
+                        <li>Scan QR Code ini menggunakan Kamera HP Anda.</li>
+                        <li>Buka tautan formulir Asisten UGD yang muncul.</li>
+                        <li>Isi data pasien dan salin teks/kirim langsung ke WhatsApp.</li>
+                    </ol>
+                </div>
+                <div class="footer-section">
+                    Tim IT & Pelayanan Medis UGD Puskesmas Sampanahan © 2026
+                </div>
+            </div>
+        `;
+    }
+
+    // Fungsi Utama Menyusun Tata Letak Grid dan Generate QR
+    function renderLayout() {
+        const paper = document.getElementById("paperPage");
+        const paperSize = document.getElementById("paperSizeSelect").value;
+        const count = parseInt(document.getElementById("layoutSelect").value);
+
+        // 1. Reset class pada kertas penginduk
+        paper.className = `paper-page ${paperSize}`;
+        if (count > 1) {
+            paper.classList.add(`layout-${count}`);
+        }
+
+        // 2. Gandakan template poster ke dalam kertas sesuai jumlah pilihan
+        let htmlContent = "";
+        for (let i = 0; i < count; i++) {
+            htmlContent += getPosterTemplate(i);
+        }
+        paper.innerHTML = htmlContent;
+
+        // 3. Tentukan ukuran resolusi pixel QR Code agar pas dengan layout grid
+        let qrSize = 220;
+        if (count === 2) qrSize = 160;
+        if (count === 4) qrSize = 100;
+        if (paperSize === 'page-a5' && count === 1) qrSize = 130;
+
+        // 4. Generate QR code otomatis ke masing-masing poster yang dibuat
+        for (let i = 0; i < count; i++) {
+            new QRCode(document.getElementById(`qrcode_${i}`), {
+                text: "https://pkmsampanahan.github.io/konsulugd/",
+                width: qrSize,
+                height: qrSize,
+                colorDark : "#111b21",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+    }
+
+    // Jalankan render otomatis saat pertama kali file dibuka
+    renderLayout();
+</script>
+
+</body>
+</html>
