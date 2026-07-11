@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Generator Konsul WA UGD - Mobile Friendly</title>
+    <title>Aplikasi Asisten UGD - Puskesmas Sampanahan</title>
+    
+    <!-- Konfigurasi Meta untuk PWA -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Asisten UGD">
+    <meta name="apple-mobile-web-app-title" content="Asisten UGD">
+    <meta name="theme-color" content="#008069">
+    
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -29,10 +37,58 @@
             padding: 16px;
             margin-bottom: 20px;
         }
+        
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            background: #e9edef;
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            gap: 4px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: #54656f;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+        .tab-btn.active[data-tab="konsul"] {
+            background: #008069;
+            color: white;
+        }
+        .tab-btn.active[data-tab="rujukan"] {
+            background: #0277bd;
+            color: white;
+        }
+        
+        /* Tab Content Display Logic */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
         .header {
             border-bottom: 2px solid #e9edef;
             padding-bottom: 10px;
             margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -40,8 +96,18 @@
         .header h2 {
             margin: 0;
             font-size: 1.15rem;
-            color: #008069;
             font-weight: 700;
+        }
+        .konsul-color { color: #008069 !important; }
+        .rujukan-color { color: #0277bd !important; }
+        
+        .status-badge {
+            font-size: 0.7rem;
+            background-color: #e1f5fe;
+            color: #0277bd;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
         }
         .form-group {
             margin-bottom: 14px;
@@ -53,36 +119,67 @@
             margin-bottom: 4px;
             color: #3b4a54;
         }
-        .form-group input, .form-group textarea {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%;
-            padding: 12px; /* Lebih besar agar mudah di-tap di HP */
+            padding: 12px;
             border: 1px solid #a1b0b9;
             border-radius: 8px;
-            font-size: 1rem; /* Mencegah auto-zoom di iOS (minimal 16px/1rem) */
+            font-size: 1rem;
             outline: none;
             transition: border-color 0.2s;
             background-color: #fff;
         }
-        .form-group input:focus, .form-group textarea:focus {
-            border-color: #008069;
-            background-color: #fff;
+        .form-group select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23667781'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 24px;
+            padding-right: 40px;
         }
+        
+        /* Dynamic Focus Colors */
+        body[data-active-tab="konsul"] .form-group input:focus,
+        body[data-active-tab="konsul"] .form-group textarea:focus {
+            border-color: #008069;
+        }
+        body[data-active-tab="rujukan"] .form-group input:focus,
+        body[data-active-tab="rujukan"] .form-group textarea:focus,
+        body[data-active-tab="rujukan"] .form-group select:focus {
+            border-color: #0277bd;
+        }
+        
         .form-group textarea {
             resize: none;
             height: 65px;
         }
         
-        /* Tabel Input Tanda Vital - Dioptimalkan untuk HP */
-        .vitals-title {
+        .identity-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .identity-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .section-title {
             font-size: 0.85rem;
             font-weight: 600;
             color: #3b4a54;
             margin-bottom: 6px;
             margin-top: 14px;
+            border-bottom: 1px solid #e9edef;
+            padding-bottom: 4px;
         }
+        
+        /* Vitals Input Grid */
         .vitals-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 Kolom sejajar di layar HP */
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
             background: #f8f9fa;
             padding: 12px;
@@ -104,13 +201,14 @@
             text-overflow: ellipsis;
         }
         .vital-input-group input {
+            width: 100%; /* MEMPERBAIKI MASALAH OVERFLOW KELUAR LAYAR HP */
             padding: 10px;
-            font-size: 1rem; /* Mencegah auto-zoom */
+            font-size: 1rem;
             border: 1px solid #a1b0b9;
             border-radius: 6px;
         }
 
-        /* Tombol Aksi */
+        /* Buttons Layout */
         .btn-group {
             display: flex;
             gap: 10px;
@@ -118,32 +216,33 @@
         }
         .btn {
             flex: 1;
-            padding: 14px; /* Nyaman untuk jempol */
+            padding: 14px;
             border: none;
             border-radius: 8px;
             font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 6px;
             user-select: none;
+            transition: background-color 0.2s;
         }
-        .btn-primary {
-            background-color: #008069;
-            color: white;
-        }
-        .btn-primary:active {
-            background-color: #005e4d;
-        }
-        .btn-secondary {
-            background-color: #e9edef;
-            color: #3b4a54;
-        }
-        .btn-secondary:active {
-            background-color: #c1c7cb;
+        
+        .btn-primary-konsul { background-color: #008069; color: white; }
+        .btn-primary-konsul:active { background-color: #005e4d; }
+        
+        .btn-primary-rujukan { background-color: #0277bd; color: white; }
+        .btn-primary-rujukan:active { background-color: #01579b; }
+
+        .btn-secondary { background-color: #e9edef; color: #3b4a54; }
+        .btn-secondary:active { background-color: #c1c7cb; }
+        
+        .btn-danger {
+            background-color: #fff5f5;
+            color: #e53935;
+            border: 1px solid #ffcdd2;
         }
         
         /* Preview Chat Box */
@@ -164,7 +263,7 @@
         }
         .bubble {
             background-color: #d9fdd3;
-            padding: 8px 10px;
+            padding: 10px 12px;
             border-radius: 8px;
             font-size: 0.88rem;
             white-space: pre-wrap;
@@ -174,7 +273,7 @@
             word-break: break-word;
         }
         
-        /* Notifikasi Sukses Salin */
+        /* Toast Alert */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -187,61 +286,128 @@
             font-size: 0.875rem;
             transition: transform 0.2s ease;
             z-index: 1000;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-            pointer-events: none;
             white-space: nowrap;
+            pointer-events: none;
         }
         .toast.show {
             transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
-<body>
+<body data-active-tab="konsul">
 
 <div class="container">
-    <div class="header">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#008069"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.294 1.48 4.925 1.481 5.429 0 9.85-4.414 9.853-9.84.002-2.63-1.023-5.101-2.885-6.963C16.673 1.97 14.202.947 11.58.947c-5.429 0-9.849 4.415-9.853 9.841-.002 1.712.455 3.382 1.32 4.874L2 21.082l5.064-1.327z"/></svg>
-        <h2>Generator Konsul WA UGD (HP)</h2>
+    <!-- Tab Navigation Selector -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="konsul" onclick="switchTab('konsul')">💬 Konsul dr. UGD</button>
+        <button class="tab-btn" data-tab="rujukan" onclick="switchTab('rujukan')">🏥 Rujukan RS</button>
     </div>
 
+    <!-- DATA BERSAMA (SHARED FIELD) - Sinkron Otomatis antara kedua sistem -->
+    <div class="section-title">Data Identitas Umum</div>
     <div class="form-group">
-        <label for="nama">Nama Pasien</label>
-        <input type="text" id="nama" placeholder="Contoh: Tn. Ali" oninput="updatePreview()">
+        <label for="shared_nama">Nama Pasien</label>
+        <input type="text" id="shared_nama" placeholder="Contoh: Tn. Ali" oninput="syncAndDataHandle()">
     </div>
-
     <div class="form-group">
-        <label for="keluhan">Keluhan Utama</label>
-        <textarea id="keluhan" placeholder="Contoh: Sesak napas mendadak sejak 30 menit lalu" oninput="updatePreview()"></textarea>
+        <label for="shared_keluhan">Keluhan Utama</label>
+        <textarea id="shared_keluhan" placeholder="Tuliskan keluhan utama pasien secara lengkap..." oninput="syncAndDataHandle()"></textarea>
     </div>
 
-    <div class="vitals-title">Tanda Vital (Tabel Input)</div>
+    <div class="section-title">Tanda Vital Utama</div>
     <div class="vitals-grid">
         <div class="vital-input-group">
-            <label for="td">TD (mmHg)</label>
-            <input type="text" id="td" placeholder="120/80" oninput="updatePreview()">
+            <label for="shared_td">TD (mmHg)</label>
+            <input type="text" id="shared_td" placeholder="120/80" oninput="syncAndDataHandle()">
         </div>
         <div class="vital-input-group">
-            <label for="nadi">Nadi (x/mnt)</label>
-            <input type="text" id="nadi" placeholder="88" oninput="updatePreview()">
+            <label for="shared_nadi">Nadi (x/mnt)</label>
+            <input type="text" id="shared_nadi" placeholder="88" oninput="syncAndDataHandle()">
         </div>
         <div class="vital-input-group">
-            <label for="rr">RR (x/mnt)</label>
-            <input type="text" id="rr" placeholder="20" oninput="updatePreview()">
+            <label for="shared_rr">RR (x/mnt)</label>
+            <input type="text" id="shared_rr" placeholder="20" oninput="syncAndDataHandle()">
         </div>
         <div class="vital-input-group">
-            <label for="suhu">Suhu (°C)</label>
-            <input type="text" id="suhu" placeholder="36.5" oninput="updatePreview()">
+            <label for="shared_suhu">Suhu (°C)</label>
+            <input type="text" id="shared_suhu" placeholder="36.5" oninput="syncAndDataHandle()">
         </div>
-        <div class="vital-input-group">
-            <label for="spo2">SpO2 (%)</label>
-            <input type="text" id="spo2" placeholder="98" oninput="updatePreview()">
-        </div>
-        <div class="vital-input-group">
-            <label for="lainnya">Lain-lain / GCS</label>
-            <input type="text" id="lainnya" placeholder="GCS E4V5M6" oninput="updatePreview()">
+        <div class="vital-input-group" style="grid-column: span 2;">
+            <label for="shared_spo2">SpO2 (%)</label>
+            <input type="text" id="shared_spo2" placeholder="98" oninput="syncAndDataHandle()">
         </div>
     </div>
 
+    <!-- ======================= TAB 1: KONSUL UGD ======================= -->
+    <div id="tab-konsul" class="tab-content active">
+        <div class="header">
+            <div class="header-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#008069"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.294 1.48 4.925 1.481 5.429 0 9.85-4.414 9.853-9.84.002-2.63-1.023-5.101-2.885-6.963C16.673 1.97 14.202.947 11.58.947c-5.429 0-9.849 4.415-9.853 9.841-.002 1.712.455 3.382 1.32 4.874L2 21.082l5.064-1.327z"/></svg>
+                <h2 class="konsul-color">Generator Konsul WA</h2>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="konsul_lainnya">Lain-lain / GCS / Tambahan</label>
+            <input type="text" id="konsul_lainnya" placeholder="Contoh: GCS E4V5M6, Akral hangat" oninput="syncAndDataHandle()">
+        </div>
+    </div>
+
+    <!-- ======================= TAB 2: RUJUKAN RS ======================= -->
+    <div id="tab-rujukan" class="tab-content">
+        <div class="header">
+            <div class="header-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#0277bd"><path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>
+                <h2 class="rujukan-color">Form Rujukan RS</h2>
+            </div>
+            <div class="status-badge">✓ Autosave</div>
+        </div>
+
+        <div class="form-group">
+            <label for="rs_tujuan">RS Tujuan Rujukan</label>
+            <select id="rs_tujuan" onchange="syncAndDataHandle()">
+                <option value="">-- Pilih RS Rujukan --</option>
+                <option value="RSUD dr. H. Andi Abdurrahman Noor">RSUD dr. H. Andi Abdurrahman Noor</option>
+                <option value="RS Marina Permata">RS Marina Permata</option>
+                <option value="RSIA Paradise">RSIA Paradise</option>
+                <option value="RSUD Pangeran Jaya Sumitra">RSUD Pangeran Jaya Sumitra</option>
+                <option value="RSUD SENGAYAM">RSUD SENGAYAM</option>
+                <option value="RSUD Panglima Sebaya">RSUD Panglima Sebaya</option>
+            </select>
+        </div>
+
+        <div class="identity-row">
+            <div class="form-group">
+                <label for="rujuk_umur_angka">Umur</label>
+                <select id="rujuk_umur_angka" onchange="syncAndDataHandle()"></select>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="rujuk_umur_satuan">Satuan</label>
+                <select id="rujuk_umur_satuan" onchange="syncAndDataHandle()">
+                    <option value="Thn">Thn</option>
+                    <option value="Bln">Bln</option>
+                    <option value="Hari">Hari</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="rujuk_diagnosis">Diagnosis Kerja (Suspect)</label>
+            <input type="text" id="rujuk_diagnosis" placeholder="Contoh: STEMI / Fraktur Femur" oninput="syncAndDataHandle()">
+        </div>
+
+        <div class="form-group">
+            <label for="rujuk_kesadaran">Kesadaran / Status GCS</label>
+            <input type="text" id="rujuk_kesadaran" placeholder="Contoh: Compos Mentis / GCS E4V5M6" oninput="syncAndDataHandle()">
+        </div>
+
+        <div class="form-group">
+            <label for="rujuk_terapi">Terapi / Tindakan di UGD</label>
+            <textarea id="rujuk_terapi" style="height: 80px;" placeholder="Contoh:&#10;- O2 3 lpm NK&#10;- IVFD RL 20 tpm" oninput="syncAndDataHandle()"></textarea>
+        </div>
+    </div>
+
+    <!-- ======================= LAYOUT PREVIEW & OUTPUT ACTION ======================= -->
     <div class="preview-title">Preview Pesan WA</div>
     <div class="preview-box">
         <div class="bubble" id="whatsappBubble"></div>
@@ -249,68 +415,214 @@
 
     <div class="btn-group">
         <button class="btn btn-secondary" onclick="copyText()">📋 Salin Teks</button>
-        <button class="btn btn-primary" onclick="sendWhatsApp()">💬 Kirim WA</button>
+        <button class="btn id-btn-primary" id="btnPrimaryAksi" onclick="sendWhatsApp()">💬 Kirim WA</button>
+    </div>
+    
+    <div style="margin-top: 10px;">
+        <button class="btn btn-danger" style="width: 100%; padding: 10px;" onclick="resetForm()">🔄 Bersihkan Semua Isian</button>
     </div>
 </div>
 
 <div class="toast" id="toast">Teks berhasil disalin!</div>
 
 <script>
-    function generateTemplate() {
-        const nama = document.getElementById('nama').value.trim() || '-';
-        const keluhan = document.getElementById('keluhan').value.trim() || '-';
+    let activeTab = 'konsul';
+    
+    // List element fields data untuk autosave localStorage
+    const fields = [
+        'shared_nama', 'shared_keluhan', 'shared_td', 'shared_nadi', 'shared_rr', 'shared_suhu', 'shared_spo2',
+        'konsul_lainnya', 'rs_tujuan', 'rujuk_umur_angka', 'rujuk_umur_satuan', 'rujuk_diagnosis', 'rujuk_kesadaran', 'rujuk_terapi'
+    ];
+
+    // Generate pilihan nomor umur (0 - 100)
+    const selectUmur = document.getElementById('rujuk_umur_angka');
+    for (let i = 0; i <= 100; i++) {
+        let opt = document.createElement('option');
+        opt.value = i;
+        opt.innerHTML = i;
+        if(i === 30) opt.selected = true;
+        selectUmur.appendChild(opt);
+    }
+
+    // Load data lama dari LocalStorage saat dimuat pertama kali
+    window.addEventListener('DOMContentLoaded', () => {
+        fields.forEach(field => {
+            const savedValue = localStorage.getItem('asisten_ugd_v1_' + field);
+            if (savedValue) {
+                document.getElementById(field).value = savedValue;
+            }
+        });
         
-        const td = document.getElementById('td').value.trim();
-        const nadi = document.getElementById('nadi').value.trim();
-        const rr = document.getElementById('rr').value.trim();
-        const suhu = document.getElementById('suhu').value.trim();
-        const spo2 = document.getElementById('spo2').value.trim();
-        const lainnya = document.getElementById('lainnya').value.trim();
+        // Mengembalikan status tab terakhir jika ada
+        const savedTab = localStorage.getItem('asisten_ugd_active_tab');
+        if (savedTab) {
+            switchTab(savedTab);
+        } else {
+            updatePreview();
+        }
+    });
 
-        let kondisiArr = [];
-        if (td) kondisiArr.push(`TD ${td} mmHg`);
-        if (nadi) kondisiArr.push(`Nadi ${nadi} x/m`);
-        if (rr) kondisiArr.push(`RR ${rr} x/m`);
-        if (suhu) kondisiArr.push(`Suhu ${suhu} °C`);
-        if (spo2) kondisiArr.push(`SpO2 ${spo2}%`);
-        if (lainnya) kondisiArr.push(lainnya);
+    // Handle perpindahan tab menu
+    function switchTab(tabName) {
+        activeTab = tabName;
+        localStorage.setItem('asisten_ugd_active_tab', tabName);
+        document.body.setAttribute('data-active-tab', tabName);
 
-        const kondisiText = kondisiArr.length > 0 ? kondisiArr.join(', ') : '-';
+        // Update visual active state di selector tab
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
 
-        return `Dok, izin konsul pasien UGD:
+        // Toggle visibility form content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+
+        // Sesuaikan warna & label tombol utama di bawah berdasarkan tab aktif
+        const btnPrimary = document.getElementById('btnPrimaryAksi');
+        if (tabName === 'konsul') {
+            btnPrimary.className = 'btn btn-primary-konsul';
+            btnPrimary.innerHTML = '💬 Kirim WA Konsul';
+        } else {
+            btnPrimary.className = 'btn btn-primary-rujukan';
+            btnPrimary.innerHTML = '💬 Kirim WA Rujukan';
+        }
+
+        updatePreview();
+    }
+
+    // Trigger update data & simpan otomatis ke browser penyimpanan lokal
+    function syncAndDataHandle() {
+        fields.forEach(field => {
+            localStorage.setItem('asisten_ugd_v1_' + field, document.getElementById(field).value);
+        });
+        updatePreview();
+    }
+
+    // Mendapatkan Format Jam & Tanggal Lokal WITA
+    function getWaktuSekarang() {
+        const sekarang = new Date();
+        const tgl = String(sekarang.getDate()).padStart(2, '0');
+        const bln = String(sekarang.getMonth() + 1).padStart(2, '0');
+        const thn = sekarang.getFullYear();
+        const jam = String(sekarang.getHours()).padStart(2, '0');
+        const mnt = String(sekarang.getMinutes()).padStart(2, '0');
+        return `${tgl}/${bln}/${thn} - ${jam}:${mnt} WITA`;
+    }
+
+    // Generator Template Teks WhatsApp Dinamis berdasarkan Tab Aktif
+    function generateTemplate() {
+        // Data Bersama (Shared)
+        const nama = document.getElementById('shared_nama').value.trim() || '-';
+        const keluhan = document.getElementById('shared_keluhan').value.trim() || '-';
+        const td = document.getElementById('shared_td').value.trim();
+        const nadi = document.getElementById('shared_nadi').value.trim();
+        const rr = document.getElementById('shared_rr').value.trim();
+        const suhu = document.getElementById('shared_suhu').value.trim();
+        const spo2 = document.getElementById('shared_spo2').value.trim();
+
+        if (activeTab === 'konsul') {
+            // Pemrosesan teks format KONSUL DOKTER UGD
+            const lainnya = document.getElementById('konsul_lainnya').value.trim();
+            let kondisiArr = [];
+            if (td) kondisiArr.push(`TD ${td} mmHg`);
+            if (nadi) kondisiArr.push(`Nadi ${nadi} x/m`);
+            if (rr) kondisiArr.push(`RR ${rr} x/m`);
+            if (suhu) kondisiArr.push(`Suhu ${suhu} °C`);
+            if (spo2) kondisiArr.push(`SpO2 ${spo2}%`);
+            if (lainnya) kondisiArr.push(lainnya);
+
+            const kondisiText = kondisiArr.length > 0 ? kondisiArr.join(', ') : '-';
+
+            return `Dok, izin konsul pasien UGD:
 ` +
-               `*Nama:* ${nama}
+                   `*Nama:* ${nama}
 ` +
-               `*Keluhan:* ${keluhan}
+                   `*Keluhan:* ${keluhan}
 ` +
-               `*Kondisi saat ini:* ${kondisiText}
+                   `*Kondisi saat ini:* ${kondisiText}
 
 ` +
-               `Mohon saran dan arahannya, Dok. Terima kasih.`;
+                   `Mohon saran dan arahannya, Dok. Terima kasih.`;
+
+        } else {
+            // Pemrosesan teks format RUJUKAN RUMAH SAKIT
+            const rs = document.getElementById('rs_tujuan').value || '...';
+            const umurAngka = document.getElementById('rujuk_umur_angka').value;
+            const umurSatuan = document.getElementById('rujuk_umur_satuan').value;
+            const diag = document.getElementById('rujuk_diagnosis').value.trim() || '-';
+            const kesadaran = document.getElementById('rujuk_kesadaran').value.trim() || '-';
+            const terapi = document.getElementById('rujuk_terapi').value.trim() || '-';
+
+            let kondisiArr = [];
+            if (td) kondisiArr.push(`TD ${td} mmHg`);
+            if (nadi) kondisiArr.push(`Nadi ${nadi} x/m`);
+            if (rr) kondisiArr.push(`RR ${rr} x/m`);
+            if (suhu) kondisiArr.push(`Suhu ${suhu} °C`);
+            if (spo2) kondisiArr.push(`SpO2 ${spo2}%`);
+
+            const vitalsText = kondisiArr.length > 0 ? kondisiArr.join(' | ') : '-';
+            const waktuStamp = getWaktuSekarang();
+
+            return `*IZIN RUJUKAN PASIEN UGD PUSKESMAS*
+
+` +
+                   `*Yth. dr. / Petugas Triage ${rs}*
+` +
+                   `Mohon izin konfirmasi rujukan pasien dari UGD Puskesmas Sampanahan (${waktuStamp}):
+
+` +
+                   `*Nama / Usia:* ${nama} / ${umurAngka} ${umurSatuan}
+` +
+                   `*Diagnosis:* ${diag}
+` +
+                   `*Keluhan Utama:* ${keluhan}
+
+` +
+                   `*Tanda Vital & Kesadaran:*
+` +
+                   `- Kesadaran: ${kesadaran}
+` +
+                   `- Tanda Vital: ${vitalsText}
+
+` +
+                   `*Tindakan/Terapi di UGD:*
+${terapi}
+
+` +
+                   `Mohon arahan dan informasi ketersediaan tempat untuk tindak lanjut pasien tersebut. Terima kasih.`;
+        }
     }
 
     function updatePreview() {
-        const text = generateTemplate();
-        document.getElementById('whatsappBubble').innerText = text;
+        document.getElementById('whatsappBubble').innerText = generateTemplate();
     }
 
     function copyText() {
-        const text = generateTemplate();
-        navigator.clipboard.writeText(text).then(() => {
-            const toast = document.getElementById('toast');
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2000);
-        });
+        navigator.clipboard.writeText(generateTemplate()).then(() => showToast("Teks berhasil disalin!"));
     }
 
     function sendWhatsApp() {
-        const text = generateTemplate();
-        const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-        window.open(url, '_blank');
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(generateTemplate())}`, '_blank');
     }
 
-    // Initialize preview
-    updatePreview();
+    function resetForm() {
+        if(confirm("Apakah Anda yakin ingin membersihkan data seluruh isian formulir?")) {
+            fields.forEach(field => {
+                if(field === 'rujuk_umur_angka') document.getElementById(field).value = '30';
+                else if(field === 'rujuk_umur_satuan') document.getElementById(field).value = 'Thn';
+                else document.getElementById(field).value = '';
+                localStorage.removeItem('asisten_ugd_v1_' + field);
+            });
+            updatePreview();
+            showToast("Semua data dibersihkan!");
+        }
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
 </script>
 
 </body>
