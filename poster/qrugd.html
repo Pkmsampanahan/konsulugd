@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Poster Absensi UGD Sampanahan</title>
+    <!-- Menggunakan pustaka QRCode.js untuk generate QR otomatis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        
+        /* Pengaturan Layout untuk Layar Monitor */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #4a4d50;
+            margin: 0;
+            padding: 20px 0 40px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Toolbar Pemilih (Hanya Tampil di Layar Monitor) */
+        .print-toolbar {
+            background: #ffffff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            z-index: 100;
+        }
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .print-toolbar label {
+            font-weight: bold;
+            color: #3b4a54;
+            font-size: 0.95rem;
+        }
+        .print-toolbar select {
+            padding: 8px 16px;
+            font-size: 0.95rem;
+            border-radius: 20px;
+            border: 2px solid #008069;
+            outline: none;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: #fff;
+        }
+        .print-btn {
+            background-color: #008069;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .print-btn:hover {
+            background-color: #005e4d;
+        }
+
+        /* =============== KANVAS WADAH UTAMA KERTAS =============== */
+        .paper-page {
+            background: #ffffff;
+            width: 210mm;
+            height: 297mm;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s ease-in-out;
+            padding: 12mm; /* Ruang aman margin kertas */
+            
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+            gap: 0;
+        }
+
+        /* Variasi Ukuran Kertas Fisik */
+        .paper-page.page-a4 { width: 210mm; height: 297mm; }
+        .paper-page.page-f4 { width: 215mm; height: 330mm; }
+        .paper-page.page-a5 { width: 148mm; height: 210mm; }
+
+        /* Variasi Layout Grid Multi-Poster */
+        .paper-page.layout-2 {
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15mm;
+        }
+        .paper-page.layout-4 {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 10mm;
+        }
+
+        /* =============== PILIHAN GARIS POTONG / CENTANG (CUT LINES) =============== */
+        .poster-wrapper {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            transition: padding 0.2s;
+        }
+        /* Jika opsi cetakan potong aktif, beri border putus-putus pembantu */
+        .paper-page.with-cutline .poster-wrapper {
+            border: 1px dashed #a1b0b9;
+            padding: 4px;
+        }
+
+        /* =============== DESAIN KOTAK POSTER ABSENSI =============== */
+        .poster-canvas {
+            background: #ffffff;
+            width: 100%;
+            height: 100%;
+            padding: 15mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            border: 6px solid #111b21; /* Warna gelap kokoh */
+            overflow: hidden;
+        }
+
+        /* Aksen Border Ganda Khas Instansi */
+        .poster-inner-border {
+            position: absolute;
+            top: 4mm; left: 4mm; right: 4mm; bottom: 4mm;
+            border: 2px solid #008069; /* Hijau ciri khas kesehatan */
+            pointer-events: none;
+        }
+
+        /* Gaya Konten */
+        .header-section { text-align: center; width: 100%; }
+        .header-section h1 {
+            color: #008069; font-size: 2.5rem; margin: 0 0 5px 0; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .header-section h2 { color: #111b21; font-size: 1.4rem; margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; }
+        .header-section p {
+            color: #54656f; font-size: 1.1rem; margin: 0; font-weight: 600;
+            border-bottom: 3px double #a1b0b9; padding-bottom: 12px;
+        }
+
+        .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 10mm 0; }
+        .qr-wrapper {
+            background: #ffffff; padding: 22px; border-radius: 16px;
+            border: 5px solid #111b21; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+        .qr-code-text {
+            font-family: "Courier New", Courier, monospace; font-size: 1rem; font-weight: bold;
+            color: #111b21; margin-top: 15px; background: #e9edef; padding: 6px 16px; border-radius: 6px;
+            letter-spacing: 1.5px;
+        }
+
+        .instruction-section { background: #f8f9fa; border-left: 6px solid #008069; padding: 15px 20px; border-radius: 6px; width: 100%; }
+        .instruction-section h3 { margin: 0 0 8px 0; color: #111b21; font-size: 1.2rem; font-weight: 700; }
+        .instruction-section ol { margin: 0; padding-left: 18px; }
+        .instruction-section li { font-size: 1rem; color: #3b4a54; margin-bottom: 6px; line-height: 1.4; font-weight: 600; }
+
+        .footer-section { text-align: center; font-size: 0.85rem; color: #7a8f9d; font-weight: bold; width: 100%; border-top: 1px solid #e9edef; padding-top: 8px; text-transform: uppercase; }
+
+        /* =================== ADJUSTMENT MULTI-POSTER =================== */
+        .paper-page.layout-2 .poster-canvas { padding: 10mm; }
+        .paper-page.layout-2 .header-section h1 { font-size: 1.9rem; }
+        .paper-page.layout-2 .header-section h2 { font-size: 1.1rem; }
+        .paper-page.layout-2 .header-section p { font-size: 0.9rem; }
+
+        .paper-page.layout-4 .poster-canvas { padding: 6mm; border-width: 4px; }
+        .paper-page.layout-4 .poster-inner-border { top: 2mm; left: 2mm; right: 2mm; bottom: 2mm; }
+        .paper-page.layout-4 .header-section h1 { font-size: 1.2rem; }
+        .paper-page.layout-4 .header-section h2 { font-size: 0.85rem; margin-bottom: 4px; }
+        .paper-page.layout-4 .header-section p { font-size: 0.68rem; padding-bottom: 5px; }
+        .paper-page.layout-4 .qr-wrapper { padding: 10px; border-width: 3px; border-radius: 8px; }
+        .paper-page.layout-4 .qr-code-text { font-size: 0.65rem; margin-top: 6px; padding: 2px 6px; }
+        .paper-page.layout-4 .instruction-section { padding: 6px 10px; border-left-width: 4px; }
+        .paper-page.layout-4 .instruction-section h3 { font-size: 0.78rem; margin-bottom: 3px; }
+        .paper-page.layout-4 .instruction-section li { font-size: 0.62rem; margin-bottom: 2px; line-height: 1.2; }
+        .paper-page.layout-4 .footer-section { font-size: 0.58rem; padding-top: 4px; }
+
+        /* =================== ATURAN PRINT CETAK =================== */
+        @media print {
+            body { background-color: #ffffff; margin: 0; padding: 0; }
+            .print-toolbar { display: none !important; }
+            .paper-page { box-shadow: none !important; margin: 0 !important; }
+            .paper-page.page-a4 { width: 210mm; height: 297mm; }
+            .paper-page.page-f4 { width: 215mm; height: 330mm; }
+            .paper-page.page-a5 { width: 148mm; height: 210mm; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Menu Konfigurasi Cetak -->
+<div class="print-toolbar">
+    <div class="toolbar-group">
+        <label for="paperSizeSelect">📐 Ukuran Kertas:</label>
+        <select id="paperSizeSelect" onchange="renderLayout()">
+            <option value="page-a4">A4</option>
+            <option value="page-f4">F4 / Folio</option>
+            <option value="page-a5">A5</option>
+        </select>
+    </div>
+    
+    <div class="toolbar-group">
+        <label for="layoutSelect">🎴 Jumlah Grid Poster:</label>
+        <select id="layoutSelect" onchange="renderLayout()">
+            <option value="1">1 Lembar = 1 Poster Absen Besar</option>
+            <option value="2">1 Lembar = 2 Poster Absen</option>
+            <option value="4">1 Lembar = 4 Poster Absen Kecil</option>
+        </select>
+    </div>
+
+    <div class="toolbar-group">
+        <label for="cutlineSelect">✂️ Gaya Kotak Cetakan:</label>
+        <select id="cutlineSelect" onchange="renderLayout()">
+            <option value="none">Tanpa Garis Potong (Polos)</option>
+            <option value="cut">Tambahkan Kotak Centang (Garis Potong)</option>
+        </select>
+    </div>
+    
+    <button class="print-btn" onclick="window.print()">🖨️ Cetak Sekarang</button>
+</div>
+
+<!-- Kertas Tempat Cetak -->
+<div class="paper-page page-a4" id="paperPage">
+    <!-- Konten diisi dinamis -->
+</div>
+
+<script>
+    const ABSEN_CODE = "UGD-SAMPANAHAN-SCAN";
+
+    function getPosterTemplate(index) {
+        return `
+            <div class="poster-wrapper">
+                <div class="poster-canvas">
+                    <div class="poster-inner-border"></div>
+                    
+                    <div class="header-section">
+                        <h1>PRESENSI DIGITAL PETUGAS</h1>
+                        <h2>UGD Puskesmas Sampanahan</h2>
+                        <p>Silakan Lakukan Scan QR Code Untuk Mengisi Kehadiran Shifting</p>
+                    </div>
+                    
+                    <div class="qr-section">
+                        <div class="qr-wrapper">
+                            <div id="qrcode_${index}"></div>
+                        </div>
+                        <div class="qr-code-text">${ABSEN_CODE}</div>
+                    </div>
+                    
+                    <div class="instruction-section">
+                        <h3>Panduan Absensi Petugas (Perawat / Bidan / Driver):</h3>
+                        <ol>
+                            <li>Buka Aplikasi Presensi Internal UGD di HP Anda.</li>
+                            <li>Aktifkan Kamera Pemindai GPS / QR Code pada sistem aplikasi.</li>
+                            <li>Arahkan kamera tepat ke arah QR Code di atas.</li>
+                            <li>Pastikan status absensi Anda (Masuk / Sore / Lepas Jaga) berhasil tercatat.</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="footer-section">
+                        Sistem Manajemen Kehadiran Internal UGD - UPTD PKM Sampanahan © 2026
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderLayout() {
+        const paper = document.getElementById("paperPage");
+        const paperSize = document.getElementById("paperSizeSelect").value;
+        const count = parseInt(document.getElementById("layoutSelect").value);
+        const cutlineMode = document.getElementById("cutlineSelect").value;
+
+        // Atur kelas grid kertas utama
+        paper.className = `paper-page ${paperSize}`;
+        if (count > 1) {
+            paper.classList.add(`layout-${count}`);
+        }
+
+        // Terapkan efek garis potong / centang luar jika diaktifkan
+        if (cutlineMode === 'cut') {
+            paper.classList.add('with-cutline');
+        } else {
+            paper.classList.remove('with-cutline');
+        }
+
+        let htmlContent = "";
+        for (let i = 0; i < count; i++) {
+            htmlContent += getPosterTemplate(i);
+        }
+        paper.innerHTML = htmlContent;
+
+        // Penyesuaian ukuran QR Code agar pas di kotak grid
+        let qrSize = 230;
+        if (count === 2) qrSize = 155;
+        if (count === 4) qrSize = 90;
+        if (paperSize === 'page-a5' && count === 1) qrSize = 130;
+
+        // Generate QR code
+        for (let i = 0; i < count; i++) {
+            new QRCode(document.getElementById(`qrcode_${i}`), {
+                text: ABSEN_CODE,
+                width: qrSize,
+                height: qrSize,
+                colorDark : "#111b21",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+    }
+
+    renderLayout();
+</script>
+
+</body>
+</html>
