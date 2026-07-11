@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Generator Rujukan RS - UGD Puskesmas</title>
+    
+    <!-- Konfigurasi Meta untuk PWA (Bisa diinstal di HP/PC) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Rujukan UGD">
+    <meta name="apple-mobile-web-app-title" content="Rujukan UGD">
+    <meta name="theme-color" content="#0277bd">
+    
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #111b21;
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .header {
+            border-bottom: 2px solid #e9edef;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            color: #0277bd;
+            font-weight: 700;
+        }
+        .status-badge {
+            font-size: 0.7rem;
+            background-color: #e1f5fe;
+            color: #0277bd;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #3b4a54;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #a1b0b9;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            background-color: #fff;
+        }
+        .form-group select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23667781'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 24px;
+            padding-right: 40px;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: #0277bd;
+        }
+        
+        .identity-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .identity-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3b4a54;
+            margin-bottom: 6px;
+            margin-top: 14px;
+            border-bottom: 1px solid #e9edef;
+            padding-bottom: 4px;
+        }
+        
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e9edef;
+            margin-bottom: 16px;
+        }
+        .vital-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .vital-input-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #667781;
+            margin-bottom: 4px;
+        }
+        .vital-input-group input {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #a1b0b9;
+            border-radius: 6px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+        .btn-primary {
+            background-color: #0277bd;
+            color: white;
+        }
+        .btn-primary:active {
+            background-color: #01579b;
+        }
+        .btn-secondary {
+            background-color: #e9edef;
+            color: #3b4a54;
+        }
+        .btn-secondary:active {
+            background-color: #c1c7cb;
+        }
+        .btn-danger {
+            background-color: #fff5f5;
+            color: #e53935;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .preview-box {
+            background-color: #efeae2;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 14px;
+            border: 1px solid #dadbdc;
+        }
+        .preview-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #667781;
+            margin-bottom: 4px;
+        }
+        .bubble {
+            background-color: #d9fdd3;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            white-space: pre-wrap;
+            line-height: 1.4;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.1);
+            color: #111b21;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: rgba(50, 50, 50, 0.9);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            transition: transform 0.2s ease;
+            z-index: 1000;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="header-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#0277bd"><path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>
+            <h2>Form Rujukan RS</h2>
+        </div>
+        <div class="status-badge">✓ Tersimpan</div>
+    </div>
+
+    <!-- Drop-down Pilihan Rumah Sakit Rujukan -->
+    <div class="form-group">
+        <label for="rs_tujuan">RS Tujuan Rujukan</label>
+        <select id="rs_tujuan" onchange="handleInput()" autofocus>
+            <option value="">-- Pilih RS Rujukan --</option>
+            <option value="RSUD dr. H. Andi Abdurrahman Noor">RSUD dr. H. Andi Abdurrahman Noor</option>
+            <option value="RS Marina Permata">RS Marina Permata</option>
+            <option value="RSIA Paradise">RSIA Paradise</option>
+            <option value="RSUD Pangeran Jaya Sumitra">RSUD Pangeran Jaya Sumitra</option>
+            <option value="RSUD SENGAYAM">RSUD SENGAYAM</option>
+            <option value="RSUD Panglima Sebaya">RSUD Panglima Sebaya</option>
+        </select>
+    </div>
+
+    <div class="section-title">Data Pasien Klinis</div>
+    
+    <div class="identity-row">
+        <div class="form-group">
+            <label for="nama">Nama Pasien</label>
+            <input type="text" id="nama" placeholder="Contoh: Tn. Ali" oninput="handleInput()">
+        </div>
+        <div class="form-group">
+            <label for="umur_angka">Umur</label>
+            <select id="umur_angka" onchange="handleInput()"></select>
+        </div>
+        <div class="form-group">
+            <label for="umur_satuan">Satuan</label>
+            <select id="umur_satuan" onchange="handleInput()">
+                <option value="Thn">Thn</option>
+                <option value="Bln">Bln</option>
+                <option value="Hari">Hari</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="diagnosis">Diagnosis Kerja (Suspect)</label>
+        <input type="text" id="diagnosis" placeholder="Contoh: STEMI / Fraktur Femur" oninput="handleInput()">
+    </div>
+
+    <div class="form-group">
+        <label for="keluhan">Keluhan Utama</label>
+        <textarea id="keluhan" placeholder="Contoh: Nyeri dada kiri menjalar, keringat dingin" oninput="handleInput()"></textarea>
+    </div>
+
+    <div class="section-title">Pemeriksaan & Terapi</div>
+
+    <div class="form-group">
+        <label for="kesadaran">Kesadaran / GCS</label>
+        <input type="text" id="kesadaran" placeholder="Contoh: Compos Mentis / GCS E4V5M6" oninput="handleInput()">
+    </div>
+
+    <div class="vitals-grid">
+        <div class="vital-input-group">
+            <label for="td">TD (mmHg)</label>
+            <input type="text" id="td" placeholder="120/80" oninput="handleInput()">
+        </div>
+        <div class="vital-input-group">
+            <label for="nadi">Nadi (x/mnt)</label>
+            <input type="number" id="nadi" placeholder="88" inputmode="numeric" pattern="[0-3]*" oninput="handleInput()">
+        </div>
+        <div class="vital-input-group">
+            <label for="rr">RR (x/mnt)</label>
+            <input type="number" id="rr" placeholder="20" inputmode="numeric" pattern="[0-9]*" oninput="handleInput()">
+        </div>
+        <div class="vital-input-group">
+            <label for="suhu">Suhu (°C)</label>
+            <input type="number" id="suhu" placeholder="36.5" step="0.1" inputmode="decimal" oninput="handleInput()">
+        </div>
+        <div class="vital-input-group">
+            <label for="spo2">SpO2 (%)</label>
+            <input type="number" id="spo2" placeholder="98" inputmode="numeric" pattern="[0-9]*" oninput="handleInput()">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="terapi">Terapi / Tindakan di UGD</label>
+        <textarea id="terapi" style="height: 80px;" placeholder="Contoh:- O2 3 lpm NK&#10;- IVFD RL 20 tpm" oninput="handleInput()"></textarea>
+    </div>
+
+    <div class="preview-title">Preview Pesan WA</div>
+    <div class="preview-box">
+        <div class="bubble" id="whatsappBubble"></div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-secondary" onclick="copyText()">📋 Salin Teks</button>
+        <button class="btn btn-primary" onclick="sendWhatsApp()">💬 Kirim WA</button>
+    </div>
+    
+    <div style="margin-top: 10px;">
+        <button class="btn btn-danger" style="width: 100%; padding: 10px;" onclick="resetForm()">🔄 Bersihkan Isian</button>
+    </div>
+</div>
+
+<div class="toast" id="toast">Teks berhasil disalin!</div>
+
+<script>
+    const selectUmur = document.getElementById('umur_angka');
+    for (let i = 0; i <= 100; i++) {
+        let opt = document.createElement('option');
+        opt.value = i;
+        opt.innerHTML = i;
+        if(i === 30) opt.selected = true;
+        selectUmur.appendChild(opt);
+    }
+
+    const fields = ['rs_tujuan', 'nama', 'umur_angka', 'umur_satuan', 'diagnosis', 'keluhan', 'kesadaran', 'td', 'nadi', 'rr', 'suhu', 'spo2', 'terapi'];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        fields.forEach(field => {
+            const savedValue = localStorage.getItem('rujuk_rs_v4_' + field);
+            if (savedValue) {
+                document.getElementById(field).value = savedValue;
+            }
+        });
+        updatePreview();
+        
+        // Auto-focus ke menu RS Tujuan saat pertama kali dibuka
+        document.getElementById('rs_tujuan').focus();
+    });
+
+    function handleInput() {
+        fields.forEach(field => {
+            localStorage.setItem('rujuk_rs_v4_' + field, document.getElementById(field).value);
+        });
+        updatePreview();
+    }
+
+    function getWaktuSekarang() {
+        const sekarang = new Date();
+        const tgl = String(sekarang.getDate()).padStart(2, '0');
+        const bln = String(sekarang.getMonth() + 1).padStart(2, '0');
+        const thn = sekarang.getFullYear();
+        const jam = String(sekarang.getHours()).padStart(2, '0');
+        const mnt = String(sekarang.getMinutes()).padStart(2, '0');
+        return `${tgl}/${bln}/${thn} - ${jam}:${mnt} WITA`;
+    }
+
+    function generateTemplate() {
+        const rs = document.getElementById('rs_tujuan').value || '...';
+        const nama = document.getElementById('nama').value.trim() || '-';
+        const umurAngka = document.getElementById('umur_angka').value;
+        const umurSatuan = document.getElementById('umur_satuan').value;
+        const diag = document.getElementById('diagnosis').value.trim() || '-';
+        const keluhan = document.getElementById('keluhan').value.trim() || '-';
+        const kesadaran = document.getElementById('kesadaran').value.trim() || '-';
+        const terapi = document.getElementById('terapi').value.trim() || '-';
+        
+        const td = document.getElementById('td').value.trim();
+        const nadi = document.getElementById('nadi').value.trim();
+        const rr = document.getElementById('rr').value.trim();
+        const suhu = document.getElementById('suhu').value.trim();
+        const spo2 = document.getElementById('spo2').value.trim();
+
+        let kondisiArr = [];
+        if (td) kondisiArr.push(`TD ${td} mmHg`);
+        if (nadi) kondisiArr.push(`Nadi ${nadi} x/m`);
+        if (rr) kondisiArr.push(`RR ${rr} x/m`);
+        if (suhu) kondisiArr.push(`Suhu ${suhu} °C`);
+        if (spo2) kondisiArr.push(`SpO2 ${spo2}%`);
+
+        const vitalsText = kondisiArr.length > 0 ? kondisiArr.join(' | ') : '-';
+        const waktuStamp = getWaktuSekarang();
+
+        return `*IZIN RUJUKAN PASIEN UGD PUSKESMAS*
+
+` +
+               `*Yth. dr. / Petugas Triage ${rs}*
+` +
+               `Mohon izin konfirmasi rujukan pasien dari UGD Puskesmas Sampanahan (${waktuStamp}):
+
+` +
+               `*Nama / Usia:* ${nama} / ${umurAngka} ${umurSatuan}
+` +
+               `*Diagnosis:* ${diag}
+` +
+               `*Keluhan Utama:* ${keluhan}
+
+` +
+               `*Tanda Vital & Kesadaran:*
+` +
+               `- Kesadaran: ${kesadaran}
+` +
+               `- Tanda Vital: ${vitalsText}
+
+` +
+               `*Tindakan/Terapi di UGD:*
+${terapi}
+
+` +
+               `Mohon arahan dan informasi ketersediaan tempat untuk tindak lanjut pasien tersebut. Terima kasih.`;
+    }
+
+    function updatePreview() {
+        document.getElementById('whatsappBubble').innerText = generateTemplate();
+    }
+
+    function copyText() {
+        navigator.clipboard.writeText(generateTemplate()).then(() => showToast("Teks rujukan berhasil disalin!"));
+    }
+
+    function sendWhatsApp() {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(generateTemplate())}`, '_blank');
+    }
+
+    function resetForm() {
+        if(confirm("Apakah Anda yakin ingin membersihkan data rujukan ini?")) {
+            fields.forEach(field => {
+                if(field === 'umur_angka') document.getElementById(field).value = '30';
+                else if(field === 'umur_satuan') document.getElementById(field).value = 'Thn';
+                else document.getElementById(field).value = '';
+                localStorage.removeItem('rujuk_rs_v4_' + field);
+            });
+            updatePreview();
+            showToast("Data dibersihkan!");
+        }
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+</script>
+
+</body>
+</html>
