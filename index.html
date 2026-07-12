@@ -3,60 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aplikasi Asisten UGD - Puskesmas Sampanahan</title>
+    <title>Asisten UGD Pro - Puskesmas Sampanahan</title>
     
     <!-- Konfigurasi Meta untuk PWA -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Asisten UGD">
-    <meta name="apple-mobile-web-app-title" content="Asisten UGD">
+    <meta name="application-name" content="Asisten UGD Pro">
+    <meta name="apple-mobile-web-app-title" content="Asisten UGD Pro">
     <meta name="theme-color" content="#008069">
     
     <style>
+        :root {
+            --primary-konsul: #008069;
+            --primary-konsul-dark: #005e4d;
+            --primary-rujukan: #0277bd;
+            --primary-rujukan-dark: #01579b;
+            --bg-light: #f0f2f5;
+            --text-main: #111b21;
+            --text-sub: #54656f;
+            --border-color: #ced5d9;
+            --triage-merah: #d32f2f;
+            --triage-kuning: #fbc02d;
+            --triage-hijau: #388e3c;
+            --warning-alert: #ff9800;
+            --danger-alert: #f44336;
+        }
+
         *, *::before, *::after {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: #111b21;
+            background-color: var(--bg-light);
+            color: var(--text-main);
             margin: 0;
-            padding: 12px;
+            padding: 8px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
         }
+
         .container {
             background: #ffffff;
             width: 100%;
-            max-width: 480px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            max-width: 500px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             padding: 16px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         
+        /* App Header */
+        .app-title-bar {
+            text-align: center;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #f2f2f2;
+            padding-bottom: 12px;
+        }
+        .app-title-bar h1 {
+            margin: 0;
+            font-size: 1.35rem;
+            color: #008069;
+            font-weight: 800;
+        }
+        .app-title-bar p {
+            margin: 4px 0 0 0;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            letter-spacing: 0.5px;
+        }
+
         /* Navigation Tabs */
         .tabs {
             display: flex;
             background: #e9edef;
             padding: 4px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 16px;
             gap: 4px;
         }
         .tab-btn {
             flex: 1;
-            padding: 10px;
+            padding: 12px 8px;
             border: none;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
             cursor: pointer;
             background: transparent;
-            color: #54656f;
+            color: var(--text-sub);
             transition: all 0.2s ease;
             display: flex;
             justify-content: center;
@@ -64,12 +102,14 @@
             gap: 6px;
         }
         .tab-btn.active[data-tab="konsul"] {
-            background: #008069;
+            background: var(--primary-konsul);
             color: white;
+            box-shadow: 0 2px 4px rgba(0,128,105,0.2);
         }
         .tab-btn.active[data-tab="rujukan"] {
-            background: #0277bd;
+            background: var(--primary-rujukan);
             color: white;
+            box-shadow: 0 2px 4px rgba(2,119,189,0.2);
         }
         
         /* Tab Content Display Logic */
@@ -81,9 +121,9 @@
         }
 
         .header {
-            border-bottom: 2px solid #e9edef;
-            padding-bottom: 10px;
-            margin-bottom: 16px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -91,185 +131,306 @@
         .header-title {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         .header h2 {
             margin: 0;
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: 700;
         }
-        .konsul-color { color: #008069 !important; }
-        .rujukan-color { color: #0277bd !important; }
+        .konsul-color { color: var(--primary-konsul) !important; }
+        .rujukan-color { color: var(--primary-rujukan) !important; }
         
         .status-badge {
             font-size: 0.7rem;
-            background-color: #e1f5fe;
-            color: #0277bd;
+            background-color: #e8f5e9;
+            color: #2e7d32;
             padding: 4px 8px;
             border-radius: 12px;
-            font-weight: 600;
+            font-weight: 700;
         }
+
         .form-group {
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
         .form-group label {
             display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.82rem;
+            font-weight: 700;
             margin-bottom: 4px;
-            color: #3b4a54;
+            color: #2d3b45;
         }
         .form-group input, .form-group textarea, .form-group select {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #a1b0b9;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border-color);
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
             background-color: #fff;
+            color: var(--text-main);
         }
+        
         .form-group select {
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23667781'><path d='M7 10l5 5 5-5z'/></svg>");
             background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 24px;
-            padding-right: 40px;
+            background-position: right 10px center;
+            background-size: 20px;
+            padding-right: 32px;
         }
         
         /* Dynamic Focus Colors */
         body[data-active-tab="konsul"] .form-group input:focus,
-        body[data-active-tab="konsul"] .form-group textarea:focus {
-            border-color: #008069;
+        body[data-active-tab="konsul"] .form-group textarea:focus,
+        body[data-active-tab="konsul"] .form-group select:focus {
+            border-color: var(--primary-konsul);
+            box-shadow: 0 0 0 3px rgba(0, 128, 105, 0.15);
         }
         body[data-active-tab="rujukan"] .form-group input:focus,
         body[data-active-tab="rujukan"] .form-group textarea:focus,
         body[data-active-tab="rujukan"] .form-group select:focus {
-            border-color: #0277bd;
+            border-color: var(--primary-rujukan);
+            box-shadow: 0 0 0 3px rgba(2, 119, 189, 0.15);
         }
         
         .form-group textarea {
             resize: none;
-            height: 65px;
+            height: 60px;
+        }
+
+        /* Triage Selector */
+        .triage-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .triage-option {
+            border: 2px solid #e9edef;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            background: #f8f9fa;
+        }
+        .triage-option[data-triage="P1"] { color: var(--triage-merah); }
+        .triage-option[data-triage="P1"].active {
+            background-color: #ffebee;
+            border-color: var(--triage-merah);
+        }
+        .triage-option[data-triage="P2"] { color: #f57f17; }
+        .triage-option[data-triage="P2"].active {
+            background-color: #fffde7;
+            border-color: var(--triage-kuning);
+        }
+        .triage-option[data-triage="P3"] { color: var(--triage-hijau); }
+        .triage-option[data-triage="P3"].active {
+            background-color: #e8f5e9;
+            border-color: var(--triage-hijau);
         }
         
+        /* Identity Grid */
         .identity-row {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 14px;
+            grid-template-columns: 2fr 1.2fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
         }
         .identity-row .form-group {
             margin-bottom: 0;
         }
 
         .section-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #3b4a54;
-            margin-bottom: 6px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #2d3b45;
+            margin-bottom: 8px;
             margin-top: 14px;
-            border-bottom: 1px solid #e9edef;
-            padding-bottom: 4px;
+            border-left: 3.5px solid var(--primary-konsul);
+            padding-left: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        body[data-active-tab="rujukan"] .section-title {
+            border-left-color: var(--primary-rujukan);
         }
         
-        /* Vitals Input Grid */
+        /* Vitals Input Grid & Warnings */
         .vitals-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
             background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 10px;
+            border-radius: 10px;
             border: 1px solid #e9edef;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         .vital-input-group {
             display: flex;
             flex-direction: column;
+            position: relative;
         }
         .vital-input-group label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #667781;
-            margin-bottom: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            margin-bottom: 2px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         .vital-input-group input {
             width: 100%;
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #a1b0b9;
+            padding: 8px;
+            font-size: 0.95rem;
+            border: 1.5px solid var(--border-color);
             border-radius: 6px;
+            text-align: center;
+        }
+        .vital-warning {
+            font-size: 0.62rem;
+            font-weight: 700;
+            margin-top: 2px;
+            text-align: center;
+            display: none;
+            padding: 1px 3px;
+            border-radius: 4px;
+        }
+        .vital-warning.warning {
+            display: block;
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        .vital-warning.danger {
+            display: block;
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* GCS Quick Tool */
+        .gcs-tool-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f8e9;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #d0e7b5;
+            margin-bottom: 12px;
+        }
+        .gcs-tool-bar span {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #33691e;
+        }
+        .gcs-calc-btn {
+            background-color: #33691e;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Quick Therapy Chips */
+        .therapy-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+            margin-bottom: 10px;
+        }
+        .therapy-chip {
+            background: #f0f4f8;
+            border: 1px solid #d1dbe5;
+            border-radius: 12px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #243e56;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+        .therapy-chip:active {
+            background: #d1dbe5;
         }
 
         /* Buttons Layout */
         .btn-group {
             display: flex;
-            gap: 10px;
-            margin-top: 16px;
+            gap: 8px;
+            margin-top: 14px;
         }
         .btn {
             flex: 1;
-            padding: 14px;
+            padding: 12px;
             border: none;
             border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 6px;
             user-select: none;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
         }
         
-        .btn-primary-konsul { background-color: #008069; color: white; }
-        .btn-primary-konsul:active { background-color: #005e4d; }
+        .btn-primary-konsul { background-color: var(--primary-konsul); color: white; }
+        .btn-primary-konsul:active { background-color: var(--primary-konsul-dark); }
         
-        .btn-primary-rujukan { background-color: #0277bd; color: white; }
-        .btn-primary-rujukan:active { background-color: #01579b; }
+        .btn-primary-rujukan { background-color: var(--primary-rujukan); color: white; }
+        .btn-primary-rujukan:active { background-color: var(--primary-rujukan-dark); }
 
-        .btn-secondary { background-color: #e9edef; color: #3b4a54; }
-        .btn-secondary:active { background-color: #c1c7cb; }
+        .btn-secondary { background-color: #e9edef; color: #2d3b45; }
+        .btn-secondary:active { background-color: #cbd5db; }
         
         .btn-danger {
             background-color: #fff5f5;
-            color: #e53935;
+            color: var(--danger-alert);
             border: 1px solid #ffcdd2;
+        }
+        .btn-danger:active {
+            background-color: #ffe0e0;
         }
         
         /* Preview Chat Box */
         .preview-box {
             background-color: #efeae2;
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 10px;
-            margin-top: 14px;
+            margin-top: 10px;
             border: 1px solid #dadbdc;
         }
         .preview-title {
             font-size: 0.75rem;
             font-weight: bold;
             text-transform: uppercase;
-            color: #667781;
+            color: var(--text-sub);
+            margin-top: 14px;
             margin-bottom: 4px;
         }
         .bubble {
             background-color: #d9fdd3;
             padding: 10px 12px;
             border-radius: 8px;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             white-space: pre-wrap;
             line-height: 1.4;
             box-shadow: 0 1px 0.5px rgba(0,0,0,0.1);
-            color: #111b21;
+            color: var(--text-main);
             word-break: break-word;
         }
         
@@ -279,36 +440,150 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background-color: rgba(50, 50, 50, 0.9);
+            background-color: rgba(30, 30, 30, 0.95);
             color: white;
-            padding: 10px 24px;
+            padding: 10px 20px;
             border-radius: 20px;
-            font-size: 0.875rem;
-            transition: transform 0.2s ease;
-            z-index: 1000;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1100;
             white-space: nowrap;
             pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         .toast.show {
             transform: translateX(-50%) translateY(0);
+        }
+
+        /* GCS MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1200;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            padding: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            animation: modalPop 0.2s ease-out;
+        }
+        @keyframes modalPop {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e9edef;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #33691e;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-sub);
+        }
+        .gcs-select-group {
+            margin-bottom: 10px;
+        }
+        .gcs-select-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            margin-bottom: 4px;
+        }
+        .gcs-select-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+        }
+        .gcs-result-display {
+            background: #f1f8e9;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 700;
+            margin-top: 14px;
+            color: #33691e;
+            font-size: 0.9rem;
+        }
+        .modal-btn {
+            width: 100%;
+            background: #33691e;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-top: 12px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body data-active-tab="konsul">
 
 <div class="container">
+    <div class="app-title-bar">
+        <h1>🏥 ASISTEN UGD PRO</h1>
+        <p>Puskesmas Sampanahan Kelp. 1</p>
+    </div>
+
     <!-- Tab Navigation Selector -->
     <div class="tabs">
         <button class="tab-btn active" data-tab="konsul" onclick="switchTab('konsul')">💬 Konsul dr. UGD</button>
         <button class="tab-btn" data-tab="rujukan" onclick="switchTab('rujukan')">🏥 Rujukan RS</button>
     </div>
 
+    <!-- TRIAGE SELECTION -->
+    <div class="section-title">
+        Kategori Triage Pasien 
+        <span style="font-size:0.7rem; font-weight:normal; color:var(--text-sub); text-transform:none; margin-left:4px;">(Ketuk lagi untuk mengosongkan)</span>
+    </div>
+    <div class="triage-container">
+        <div class="triage-option" data-triage="P1" onclick="selectTriage('P1')">🔴 P1 (Resusitasi)</div>
+        <div class="triage-option" data-triage="P2" onclick="selectTriage('P2')">🟡 P2 (Emergency)</div>
+        <div class="triage-option" data-triage="P3" onclick="selectTriage('P3')">🟢 P3 (Non-Urgent)</div>
+    </div>
+
     <!-- DATA BERSAMA (SHARED FIELD) - Sinkron Otomatis antara kedua sistem -->
-    <div class="section-title">Data Identitas Umum</div>
+    <div class="section-title">Data Identitas Pasien</div>
     <div class="identity-row">
-        <div class="form-group">
+        <div class="form-group" style="grid-column: span 1;">
             <label for="shared_nama">Nama Pasien</label>
-            <input type="text" id="shared_nama" placeholder="Contoh: Tn. Ali" oninput="syncAndDataHandle()">
+            <input type="text" id="shared_nama" placeholder="Tn. X" oninput="syncAndDataHandle()">
+        </div>
+        <div class="form-group">
+            <label for="shared_jk">Gender</label>
+            <select id="shared_jk" onchange="syncAndDataHandle()">
+                <option value="L">Laki-laki (L)</option>
+                <option value="P">Perempuan (P)</option>
+            </select>
         </div>
         <div class="form-group">
             <label for="shared_umur_angka">Umur</label>
@@ -324,51 +599,63 @@
         </div>
     </div>
     
-    <div class="form-group">
+    <div class="form-group" style="margin-top: 10px;">
         <label for="shared_keluhan">Keluhan Utama</label>
-        <textarea id="shared_keluhan" placeholder="Tuliskan keluhan utama pasien secara lengkap..." oninput="syncAndDataHandle()"></textarea>
+        <textarea id="shared_keluhan" placeholder="Tuliskan alasan masuk pasien ke UGD..." oninput="syncAndDataHandle()"></textarea>
     </div>
 
-    <div class="section-title">Tanda Vital Utama</div>
+    <div class="section-title">Tanda Vital Utama & Analisis</div>
     <div class="vitals-grid">
         <div class="vital-input-group">
             <label for="shared_td">TD (mmHg)</label>
             <input type="text" id="shared_td" placeholder="120/80" oninput="syncAndDataHandle()">
+            <span class="vital-warning" id="warn_td">Abnormal</span>
         </div>
         <div class="vital-input-group">
             <label for="shared_nadi">Nadi (x/mnt)</label>
-            <input type="text" id="shared_nadi" placeholder="88" oninput="syncAndDataHandle()">
+            <input type="text" id="shared_nadi" placeholder="80" oninput="syncAndDataHandle()">
+            <span class="vital-warning" id="warn_nadi">Abnormal</span>
         </div>
         <div class="vital-input-group">
             <label for="shared_rr">RR (x/mnt)</label>
             <input type="text" id="shared_rr" placeholder="20" oninput="syncAndDataHandle()">
+            <span class="vital-warning" id="warn_rr">Abnormal</span>
         </div>
         <div class="vital-input-group">
             <label for="shared_suhu">Suhu (°C)</label>
             <input type="text" id="shared_suhu" placeholder="36.5" oninput="syncAndDataHandle()">
+            <span class="vital-warning" id="warn_suhu">Abnormal</span>
         </div>
         <div class="vital-input-group">
             <label for="shared_spo2">SpO2 (%)</label>
             <input type="text" id="shared_spo2" placeholder="98" oninput="syncAndDataHandle()">
+            <span class="vital-warning" id="warn_spo2">Abnormal</span>
         </div>
         <div class="vital-input-group">
             <label for="shared_gds">GDS (mg/dL)</label>
-            <input type="text" id="shared_gds" placeholder="140" oninput="syncAndDataHandle()">
+            <input type="text" id="shared_gds" placeholder="100" oninput="syncAndDataHandle()">
+            <span class="vital-warning" id="warn_gds">Abnormal</span>
         </div>
+    </div>
+
+    <!-- Quick Tools: GCS Calculator Launcher -->
+    <div class="gcs-tool-bar">
+        <span>🧠 Butuh hitung tingkat kesadaran GCS?</span>
+        <button class="gcs-calc-btn" onclick="openGcsModal()">🧮 Hitung GCS</button>
     </div>
 
     <!-- ======================= TAB 1: KONSUL UGD ======================= -->
     <div id="tab-konsul" class="tab-content active">
         <div class="header">
             <div class="header-title">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="#008069"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.294 1.48 4.925 1.481 5.429 0 9.85-4.414 9.853-9.84.002-2.63-1.023-5.101-2.885-6.963C16.673 1.97 14.202.947 11.58.947c-5.429 0-9.849 4.415-9.853 9.841-.002 1.712.455 3.382 1.32 4.874L2 21.082l5.064-1.327z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#008069"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.294 1.48 4.925 1.481 5.429 0 9.85-4.414 9.853-9.84.002-2.63-1.023-5.101-2.885-6.963C16.673 1.97 14.202.947 11.58.947c-5.429 0-9.849 4.415-9.853 9.841-.002 1.712.455 3.382 1.32 4.874L2 21.082l5.064-1.327z"/></svg>
                 <h2 class="konsul-color">Generator Konsul WA</h2>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="konsul_lainnya">Lain-lain / GCS / Tambahan</label>
-            <input type="text" id="konsul_lainnya" placeholder="Contoh: GCS E4V5M6, Akral hangat" oninput="syncAndDataHandle()">
+            <label for="konsul_lainnya">Lain-lain / GCS / Temuan Klinis</label>
+            <input type="text" id="konsul_lainnya" placeholder="Contoh: GCS E4V5M6 (Compos Mentis), Akral hangat" oninput="syncAndDataHandle()">
         </div>
     </div>
 
@@ -376,7 +663,7 @@
     <div id="tab-rujukan" class="tab-content">
         <div class="header">
             <div class="header-title">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="#0277bd"><path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#0277bd"><path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>
                 <h2 class="rujukan-color">Form Rujukan RS</h2>
             </div>
             <div class="status-badge">✓ Autosave</div>
@@ -386,33 +673,63 @@
             <label for="rs_tujuan">RS Tujuan Rujukan</label>
             <select id="rs_tujuan" onchange="syncAndDataHandle()">
                 <option value="">-- Pilih RS Rujukan --</option>
-                <option value="RSUD dr. H. Andi Abdurrahman Noor">RSUD dr. H. Andi Abdurrahman Noor</option>
+                <option value="RSUD dr. H. Andi Abdurrahman Noor">RSUD dr. H. Andi Abdurrahman Noor (Tanah Bumbu)</option>
                 <option value="RS Marina Permata">RS Marina Permata</option>
                 <option value="RSIA Paradise">RSIA Paradise</option>
-                <option value="RSUD Pangeran Jaya Sumitra">RSUD Pangeran Jaya Sumitra</option>
-                <option value="RSUD SENGAYAM">RSUD SENGAYAM</option>
+                <option value="RSUD Pangeran Jaya Sumitra">RSUD Pangeran Jaya Sumitra (Kotabaru)</option>
+                <option value="RSUD Sengayam">RSUD Sengayam</option>
                 <option value="RSUD Panglima Sebaya">RSUD Panglima Sebaya</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="rujuk_diagnosis">Diagnosis Kerja (Suspect)</label>
-            <input type="text" id="rujuk_diagnosis" placeholder="Contoh: STEMI / Fraktur Femur" oninput="syncAndDataHandle()">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label for="rujuk_diagnosis">Diagnosis Kerja (Suspect)</label>
+                <span style="font-size:0.75rem; color:var(--primary-rujukan); cursor:pointer; font-weight:700;" onclick="showQuickDiagnosis()">⚡ Gunakan Template</span>
+            </div>
+            <input type="text" id="rujuk_diagnosis" placeholder="Contoh: Dyspnea ec Susp. CHF" oninput="syncAndDataHandle()">
+            
+            <!-- Quick Diagnosis Template Selection (Collapsible) -->
+            <div id="quick_diag_panel" style="display:none; background:#f4f9fc; border:1px solid #d0e3f0; border-radius:6px; padding:8px; margin-top:6px;">
+                <div style="font-size:0.7rem; font-weight:700; color:#1a5a80; margin-bottom:4px;">Klik Diagnosis untuk Mengisi Cepat:</div>
+                <div class="therapy-chips">
+                    <span class="therapy-chip" onclick="applyDiagnosis('Gastroenteritis Akut Dehidrasi Sedang')">GEA Dehidrasi</span>
+                    <span class="therapy-chip" onclick="applyDiagnosis('Hipertensi Urgensi / Emergency')">Hipertensi Emergency</span>
+                    <span class="therapy-chip" onclick="applyDiagnosis('Dyspnea ec Susp. ALO / CHF')">Dyspnea / ALO</span>
+                    <span class="therapy-chip" onclick="applyDiagnosis('Febris h-III Susp. DHF')">Febris Susp. DHF</span>
+                    <span class="therapy-chip" onclick="applyDiagnosis('Cidera Kepala Ringan (CKR)')">Cidera Kepala Ringan</span>
+                    <span class="therapy-chip" onclick="applyDiagnosis('STEMI / Acute Coronary Syndrome')">Sindrom Koroner Akut</span>
+                    <span class="therapy-chip" onclick="applyDiagnosis('Asma Bronkial Eksaserbasi Akut')">Asma Akut</span>
+                </div>
+            </div>
         </div>
 
         <div class="form-group">
             <label for="rujuk_kesadaran">Kesadaran / Status GCS</label>
-            <input type="text" id="rujuk_kesadaran" placeholder="Contoh: Compos Mentis / GCS E4V5M6" oninput="syncAndDataHandle()">
+            <input type="text" id="rujuk_kesadaran" placeholder="Contoh: Compos Mentis, GCS E4V5M6" oninput="syncAndDataHandle()">
         </div>
 
         <div class="form-group">
-            <label for="rujuk_terapi">Terapi / Tindakan di UGD</label>
-            <textarea id="rujuk_terapi" style="height: 80px;" placeholder="Contoh:&#10;- O2 3 lpm NK&#10;- IVFD RL 20 tpm" oninput="syncAndDataHandle()"></textarea>
+            <label for="rujuk_terapi">Terapi & Tindakan Terpasang di UGD</label>
+            <textarea id="rujuk_terapi" style="height: 75px;" placeholder="Tuliskan terapi yang sudah diberikan..." oninput="syncAndDataHandle()"></textarea>
+            
+            <div style="font-size:0.75rem; font-weight:700; color:var(--text-sub); margin-top:6px;">Instan Tambah Tindakan:</div>
+            <div class="therapy-chips">
+                <span class="therapy-chip" onclick="addTherapy('- O2 Nasal Kanul 3 Lpm')">+ O2 3 Lpm</span>
+                <span class="therapy-chip" onclick="addTherapy('- O2 Simple Mask 8 Lpm')">+ O2 Mask 8 L</span>
+                <span class="therapy-chip" onclick="addTherapy('- O2 NRM 10 Lpm')">+ O2 NRM 10 L</span>
+                <span class="therapy-chip" onclick="addTherapy('- IVFD RL 20 tpm (colok tangan kanan)')">+ IVFD RL 20 tpm</span>
+                <span class="therapy-chip" onclick="addTherapy('- Inj. Ondansetron 4mg (IV)')">+ Ondansetron</span>
+                <span class="therapy-chip" onclick="addTherapy('- Inj. Ranitidin 50mg (IV)')">+ Ranitidin</span>
+                <span class="therapy-chip" onclick="addTherapy('- Inj. Antrain 1gr (IV)')">+ Antrain</span>
+                <span class="therapy-chip" onclick="addTherapy('- Nebulizer Ventolin 1 respul')">+ Nebu Ventolin</span>
+                <span class="therapy-chip" onclick="addTherapy('- Pasang Kateter Urin (DC) No. 16')">+ Pasang DC</span>
+            </div>
         </div>
     </div>
 
     <!-- ======================= LAYOUT PREVIEW & OUTPUT ACTION ======================= -->
-    <div class="preview-title">Preview Pesan WA</div>
+    <div class="preview-title">Preview Pesan WhatsApp (Format Rapih)</div>
     <div class="preview-box">
         <div class="bubble" id="whatsappBubble"></div>
     </div>
@@ -423,7 +740,53 @@
     </div>
     
     <div style="margin-top: 10px;">
-        <button class="btn btn-danger" style="width: 100%; padding: 10px;" onclick="resetForm()">🔄 Bersihkan Semua Isian</button>
+        <button class="btn btn-danger" style="width: 100%; padding: 8px; font-size:0.8rem;" onclick="resetForm()">🔄 Bersihkan Semua Isian</button>
+    </div>
+</div>
+
+<!-- ======================= INTERACTIVE GCS CALCULATOR MODAL ======================= -->
+<div id="gcsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🧮 Kalkulator GCS & Kesadaran</h3>
+            <button class="modal-close" onclick="closeGcsModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="gcs-select-group">
+                <label for="gcs_eye">Eye (Respon Membuka Mata)</label>
+                <select id="gcs_eye" onchange="calcGCS()">
+                    <option value="4">4 - Membuka mata spontan</option>
+                    <option value="3">3 - Membuka mata terhadap suara/panggilan</option>
+                    <option value="2">2 - Membuka mata terhadap rangsangan nyeri</option>
+                    <option value="1">1 - Tidak ada respon</option>
+                </select>
+            </div>
+            <div class="gcs-select-group">
+                <label for="gcs_verbal">Verbal (Respon Bicara)</label>
+                <select id="gcs_verbal" onchange="calcGCS()">
+                    <option value="5">5 - Orientasi baik & mampu menjawab teratur</option>
+                    <option value="4">4 - Bingung, disorientasi tempat/waktu</option>
+                    <option value="3">3 - Kata-kata tidak teratur/tidak tepat</option>
+                    <option value="2">2 - Mengerang/mengeluarkan suara tanpa arti</option>
+                    <option value="1">1 - Tidak ada respon</option>
+                </select>
+            </div>
+            <div class="gcs-select-group">
+                <label for="gcs_motor">Motorik (Respon Gerakan)</label>
+                <select id="gcs_motor" onchange="calcGCS()">
+                    <option value="6">6 - Mengikuti semua perintah verbal</option>
+                    <option value="5">5 - Melokalisir lokasi rangsang nyeri</option>
+                    <option value="4">4 - Menarik anggota tubuh menjauhi nyeri</option>
+                    <option value="3">3 - Fleksi abnormal (dekortikasi)</option>
+                    <option value="2">2 - Ekstensi abnormal (deserebrasi)</option>
+                    <option value="1">1 - Tidak ada respon</option>
+                </select>
+            </div>
+            <div class="gcs-result-display" id="gcs_display_val">
+                Hasil: GCS E4V5M6 (15) - Compos Mentis
+            </div>
+            <button class="modal-btn" onclick="applyGcsResult()">Gunakan Hasil GCS</button>
+        </div>
     </div>
 </div>
 
@@ -431,10 +794,12 @@
 
 <script>
     let activeTab = 'konsul';
+    let selectedTriage = null; // Default: null (tidak ada triage yang dipilih)
     
     // List element fields data untuk autosave localStorage
     const fields = [
-        'shared_nama', 'shared_umur_angka', 'shared_umur_satuan', 'shared_keluhan', 'shared_td', 'shared_nadi', 'shared_rr', 'shared_suhu', 'shared_spo2', 'shared_gds',
+        'shared_nama', 'shared_jk', 'shared_umur_angka', 'shared_umur_satuan', 'shared_keluhan', 
+        'shared_td', 'shared_nadi', 'shared_rr', 'shared_suhu', 'shared_spo2', 'shared_gds',
         'konsul_lainnya', 'rs_tujuan', 'rujuk_diagnosis', 'rujuk_kesadaran', 'rujuk_terapi'
     ];
 
@@ -451,12 +816,22 @@
     // Load data lama dari LocalStorage saat dimuat pertama kali
     window.addEventListener('DOMContentLoaded', () => {
         fields.forEach(field => {
-            const savedValue = localStorage.getItem('asisten_ugd_v2_' + field);
+            const savedValue = localStorage.getItem('asisten_ugd_v3_' + field);
             if (savedValue) {
                 document.getElementById(field).value = savedValue;
             }
         });
         
+        // Load saved triage
+        const savedTriage = localStorage.getItem('asisten_ugd_triage');
+        if (savedTriage) {
+            selectTriage(savedTriage);
+        } else {
+            selectedTriage = null;
+            document.querySelectorAll('.triage-option').forEach(opt => opt.classList.remove('active'));
+            updatePreview();
+        }
+
         // Mengembalikan status tab terakhir jika ada
         const savedTab = localStorage.getItem('asisten_ugd_active_tab');
         if (savedTab) {
@@ -465,6 +840,29 @@
             updatePreview();
         }
     });
+
+    // Handle Triage Selection dengan fitur Toggle/Batal Pilih
+    function selectTriage(triageCode) {
+        if (selectedTriage === triageCode) {
+            // Jika mengetuk triage yang sudah aktif, batalkan pilihan (menjadi kosong)
+            selectedTriage = null;
+            localStorage.removeItem('asisten_ugd_triage');
+        } else {
+            // Pilih triage baru
+            selectedTriage = triageCode;
+            localStorage.setItem('asisten_ugd_triage', triageCode);
+        }
+        
+        document.querySelectorAll('.triage-option').forEach(opt => {
+            opt.classList.remove('active');
+        });
+        
+        if (selectedTriage) {
+            document.querySelector(`.triage-option[data-triage="${selectedTriage}"]`).classList.add('active');
+        }
+        
+        syncAndDataHandle();
+    }
 
     // Handle perpindahan tab menu
     function switchTab(tabName) {
@@ -493,11 +891,128 @@
         updatePreview();
     }
 
+    // Analisis tanda vital secara instan & berikan visual warn badge
+    function analyzeVitals() {
+        const tdStr = document.getElementById('shared_td').value.trim();
+        const nadiStr = document.getElementById('shared_nadi').value.trim();
+        const rrStr = document.getElementById('shared_rr').value.trim();
+        const suhuStr = document.getElementById('shared_suhu').value.trim();
+        const spo2Str = document.getElementById('shared_spo2').value.trim();
+        const gdsStr = document.getElementById('shared_gds').value.trim();
+
+        // Warning BP
+        const warnTd = document.getElementById('warn_td');
+        if (tdStr) {
+            const parts = tdStr.split('/');
+            if (parts.length === 2) {
+                const sys = parseInt(parts[0]);
+                const dia = parseInt(parts[1]);
+                if (sys >= 140 || dia >= 90) {
+                    warnTd.className = "vital-warning warning";
+                    warnTd.innerText = "Hipertensi";
+                } else if (sys < 90 || dia < 60) {
+                    warnTd.className = "vital-warning danger";
+                    warnTd.innerText = "Hipotensi ⚠️";
+                } else {
+                    warnTd.className = "vital-warning";
+                }
+            } else {
+                warnTd.className = "vital-warning";
+            }
+        } else {
+            warnTd.className = "vital-warning";
+        }
+
+        // Warning Nadi
+        const warnNadi = document.getElementById('warn_nadi');
+        if (nadiStr) {
+            const hr = parseInt(nadiStr);
+            if (hr > 100) {
+                warnNadi.className = "vital-warning warning";
+                warnNadi.innerText = "Takikardia";
+            } else if (hr < 60) {
+                warnNadi.className = "vital-warning warning";
+                warnNadi.innerText = "Bradikardia";
+            } else {
+                warnNadi.className = "vital-warning";
+            }
+        } else {
+            warnNadi.className = "vital-warning";
+        }
+
+        // Warning RR
+        const warnRr = document.getElementById('warn_rr');
+        if (rrStr) {
+            const rr = parseInt(rrStr);
+            if (rr > 24) {
+                warnRr.className = "vital-warning danger";
+                warnRr.innerText = "Takipnea ⚠️";
+            } else if (rr < 12) {
+                warnRr.className = "vital-warning warning";
+                warnRr.innerText = "Bradipnea";
+            } else {
+                warnRr.className = "vital-warning";
+            }
+        } else {
+            warnRr.className = "vital-warning";
+        }
+
+        // Warning Suhu
+        const warnSuhu = document.getElementById('warn_suhu');
+        if (suhuStr) {
+            const temp = parseFloat(suhuStr);
+            if (temp >= 37.5) {
+                warnSuhu.className = "vital-warning warning";
+                warnSuhu.innerText = "Febris";
+            } else if (temp < 36.0) {
+                warnSuhu.className = "vital-warning danger";
+                warnSuhu.innerText = "Hipotermia ⚠️";
+            } else {
+                warnSuhu.className = "vital-warning";
+            }
+        } else {
+            warnSuhu.className = "vital-warning";
+        }
+
+        // Warning SpO2
+        const warnSpo2 = document.getElementById('warn_spo2');
+        if (spo2Str) {
+            const sat = parseInt(spo2Str);
+            if (sat < 95) {
+                warnSpo2.className = "vital-warning danger";
+                warnSpo2.innerText = "Hipoksia ⚠️";
+            } else {
+                warnSpo2.className = "vital-warning";
+            }
+        } else {
+            warnSpo2.className = "vital-warning";
+        }
+
+        // Warning GDS
+        const warnGds = document.getElementById('warn_gds');
+        if (gdsStr) {
+            const sugar = parseInt(gdsStr);
+            if (sugar > 200) {
+                warnGds.className = "vital-warning warning";
+                warnGds.innerText = "Hiperglikemia";
+            } else if (sugar < 70) {
+                warnGds.className = "vital-warning danger";
+                warnGds.innerText = "Hipoglikemia ⚠️";
+            } else {
+                warnGds.className = "vital-warning";
+            }
+        } else {
+            warnGds.className = "vital-warning";
+        }
+    }
+
     // Trigger update data & simpan otomatis ke browser penyimpanan lokal
     function syncAndDataHandle() {
         fields.forEach(field => {
-            localStorage.setItem('asisten_ugd_v2_' + field, document.getElementById(field).value);
+            const val = document.getElementById(field).value;
+            localStorage.setItem('asisten_ugd_v3_' + field, val);
         });
+        analyzeVitals();
         updatePreview();
     }
 
@@ -516,6 +1031,7 @@
     function generateTemplate() {
         // Data Bersama (Shared)
         const nama = document.getElementById('shared_nama').value.trim() || '-';
+        const jk = document.getElementById('shared_jk').value;
         const umurAngka = document.getElementById('shared_umur_angka').value;
         const umurSatuan = document.getElementById('shared_umur_satuan').value;
         const keluhan = document.getElementById('shared_keluhan').value.trim() || '-';
@@ -527,69 +1043,89 @@
         const spo2 = document.getElementById('shared_spo2').value.trim();
         const gds = document.getElementById('shared_gds').value.trim();
 
+        // Pemetaan Triage Visual ke WhatsApp (Kosongkan jika selectedTriage bernilai null)
+        let triageRow = '';
+        if (selectedTriage === 'P1') triageRow = `*Triage:* 🔴 *P1 - RESUSITASI / MERAH*\n`;
+        else if (selectedTriage === 'P2') triageRow = `*Triage:* 🟡 *P2 - EMERGENCY / KUNING*\n`;
+        else if (selectedTriage === 'P3') triageRow = `*Triage:* 🟢 *P3 - NON EMERGENCY / HIJAU*\n`;
+
         let kondisiArr = [];
-        if (td) kondisiArr.push(`TD ${td} mmHg`);
-        if (nadi) kondisiArr.push(`Nadi ${nadi} x/m`);
-        if (rr) kondisiArr.push(`RR ${rr} x/m`);
-        if (suhu) kondisiArr.push(`Suhu ${suhu} °C`);
-        if (spo2) kondisiArr.push(`SpO2 ${spo2}%`);
-        if (gds) kondisiArr.push(`GDS ${gds} mg/dL`);
+        if (td) {
+            let mark = '';
+            const bp = td.split('/');
+            if(bp.length === 2) {
+                if(parseInt(bp[0]) >= 140 || parseInt(bp[0]) < 90) mark = ' ⚠️';
+            }
+            kondisiArr.push(`- TD: ${td} mmHg${mark}`);
+        }
+        if (nadi) {
+            let mark = '';
+            if(parseInt(nadi) > 100 || parseInt(nadi) < 60) mark = ' ⚠️';
+            kondisiArr.push(`- Nadi: ${nadi} x/mnt${mark}`);
+        }
+        if (rr) {
+            let mark = '';
+            if(parseInt(rr) > 24 || parseInt(rr) < 12) mark = ' ⚠️';
+            kondisiArr.push(`- RR: ${rr} x/mnt${mark}`);
+        }
+        if (suhu) {
+            let mark = '';
+            if(parseFloat(suhu) >= 37.5 || parseFloat(suhu) < 36.0) mark = ' ⚠️';
+            kondisiArr.push(`- Suhu: ${suhu} °C${mark}`);
+        }
+        if (spo2) {
+            let mark = '';
+            if(parseInt(spo2) < 95) mark = ' 🚨 SPO2 RENDAH';
+            kondisiArr.push(`- SpO2: ${spo2}%${mark}`);
+        }
+        if (gds) {
+            let mark = '';
+            if(parseInt(gds) > 200 || parseInt(gds) < 70) mark = ' ⚠️';
+            kondisiArr.push(`- GDS: ${gds} mg/dL${mark}`);
+        }
+
+        const kondisiText = kondisiArr.length > 0 ? kondisiArr.join('\n') : '-';
 
         if (activeTab === 'konsul') {
-            // Pemrosesan teks format KONSUL DOKTER UGD (Sudah termasuk umur)
-            const lainnya = document.getElementById('konsul_lainnya').value.trim();
-            if (lainnya) kondisiArr.push(lainnya);
+            const lainnya = document.getElementById('konsul_lainnya').value.trim() || '-';
 
-            const kondisiText = kondisiArr.length > 0 ? kondisiArr.join(',\n') : '-';
+            return `Dok, izin konsul pasien baru UGD:
 
-            return `Dok, izin konsul pasien UGD:
-` +
-                   `*Nama / Usia:* ${nama} / ${umurAngka} ${umurSatuan}
-` +
-                   `*Keluhan:* ${keluhan}
-` +
-                   `*Kondisi saat ini:* \n${kondisiText}
+${triageRow}*Nama / Jk / Usia:* ${nama} / ${jk} / ${umurAngka} ${umurSatuan}
+*Keluhan Utama:* ${keluhan}
 
-` +
-                   `Mohon saran dan arahannya, Dok. Terima kasih.`;
+*Tanda Vital Utama:*
+${kondisiText}
+
+*Pemeriksaan Penunjang & GCS / Lainnya:*
+${lainnya}
+
+Mohon arahan terapi awal dan saran tindakan selanjutnya, Dok. Terima kasih.`;
 
         } else {
-            // Pemrosesan teks format RUJUKAN RUMAH SAKIT
             const rs = document.getElementById('rs_tujuan').value || '...';
             const diag = document.getElementById('rujuk_diagnosis').value.trim() || '-';
             const kesadaran = document.getElementById('rujuk_kesadaran').value.trim() || '-';
             const terapi = document.getElementById('rujuk_terapi').value.trim() || '-';
-
-            const vitalsText = kondisiArr.length > 0 ? kondisiArr.join(',\n') : '-';
             const waktuStamp = getWaktuSekarang();
 
-            return `*IZIN RUJUKAN PASIEN UGD PUSKESMAS*
+            return `*IZIN KONFIRMASI RUJUKAN PASIEN UGD*
 
-` +
-                   `*Yth. dr. / Petugas Triage ${rs}*
-` +
-                   `Mohon izin konfirmasi rujukan pasien dari UGD Puskesmas Sampanahan (${waktuStamp}):
+*Yth. dr. Jaga Triage / Petugas Medis ${rs}*
+Izin konfirmasi rujukan pasien dari *UGD Puskesmas Sampanahan* (${waktuStamp}):
 
-` +
-                   `*Nama / Usia:* ${nama} / ${umurAngka} ${umurSatuan}
-` +
-                   `*Diagnosis:* ${diag}
-` +
-                   `*Keluhan Utama:* ${keluhan}
+${triageRow}*Nama / Jk / Usia:* ${nama} / ${jk} / ${umurAngka} ${umurSatuan}
+*Diagnosis Kerja:* ${diag}
+*Keluhan Utama:* ${keluhan}
 
-` +
-                   `*Tanda Vital & Kesadaran:*
-` +
-                   `- Kesadaran: ${kesadaran}
-` +
-                   `- Tanda Vital: \n${vitalsText}
+*Tanda Vital & Status Kesadaran:*
+- Kesadaran/GCS: ${kesadaran}
+${kondisiText}
 
-` +
-                   `*Tindakan/Terapi di UGD:*
+*Terapi & Tindakan Terpasang di UGD Puskesmas:*
 ${terapi}
 
-` +
-                   `Mohon arahan dan informasi ketersediaan tempat untuk tindak lanjut pasien tersebut. Terima kasih.`;
+Mohon saran ketersediaan bed, tindak lanjut medis, dan informasi rujukan di RS. Terima kasih banyak.`;
         }
     }
 
@@ -597,34 +1133,142 @@ ${terapi}
         document.getElementById('whatsappBubble').innerText = generateTemplate();
     }
 
+    // Clipboard Copy dengan support robust fallback
     function copyText() {
-        navigator.clipboard.writeText(generateTemplate()).then(() => showToast("Teks berhasil disalin!"));
+        const textToCopy = generateTemplate();
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => showToast("Teks disalin ke clipboard!"))
+                .catch(() => copyFallback(textToCopy));
+        } else {
+            copyFallback(textToCopy);
+        }
+    }
+
+    function copyFallback(text) {
+        const tempTextarea = document.createElement("textarea");
+        tempTextarea.value = text;
+        tempTextarea.style.position = "fixed";
+        document.body.appendChild(tempTextarea);
+        tempTextarea.focus();
+        tempTextarea.select();
+        try {
+            document.execCommand('copy');
+            showToast("Teks berhasil disalin!");
+        } catch (err) {
+            showToast("Gagal menyalin teks, mohon salin manual.");
+        }
+        document.body.removeChild(tempTextarea);
     }
 
     function sendWhatsApp() {
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(generateTemplate())}`, '_blank');
     }
 
+    // Reset Form ke kondisi awal
     function resetForm() {
-        if(confirm("Apakah Anda yakin ingin membersihkan data seluruh isian formulir?")) {
+        if(confirm("Apakah Anda yakin ingin menghapus seluruh data isian?")) {
             fields.forEach(field => {
                 if(field === 'shared_umur_angka') document.getElementById(field).value = '30';
                 else if(field === 'shared_umur_satuan') document.getElementById(field).value = 'Thn';
+                else if(field === 'shared_jk') document.getElementById(field).value = 'L';
                 else document.getElementById(field).value = '';
-                localStorage.removeItem('asisten_ugd_v2_' + field);
+                localStorage.removeItem('asisten_ugd_v3_' + field);
             });
+            selectedTriage = null;
+            localStorage.removeItem('asisten_ugd_triage');
+            document.querySelectorAll('.triage-option').forEach(opt => opt.classList.remove('active'));
             updatePreview();
-            showToast("Semua data dibersihkan!");
+            showToast("Formulir dibersihkan!");
         }
+    }
+
+    // Menambahkan Teks Terapi Instan
+    function addTherapy(text) {
+        const therapyArea = document.getElementById('rujuk_terapi');
+        const currentVal = therapyArea.value.trim();
+        if (currentVal === '') {
+            therapyArea.value = text;
+        } else {
+            therapyArea.value = currentVal + '\n' + text;
+        }
+        syncAndDataHandle();
+    }
+
+    // Toggle Diagnosis Pintar
+    function showQuickDiagnosis() {
+        const panel = document.getElementById('quick_diag_panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Memasukkan diagnosis pilihan
+    function applyDiagnosis(diagName) {
+        document.getElementById('rujuk_diagnosis').value = diagName;
+        document.getElementById('quick_diag_panel').style.display = 'none';
+        syncAndDataHandle();
     }
 
     function showToast(msg) {
         const toast = document.getElementById('toast');
         toast.innerText = msg;
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
+        setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    // ================== GCS CALCULATOR LOGIC ==================
+    function openGcsModal() {
+        document.getElementById('gcsModal').classList.add('show');
+        calcGCS();
+    }
+
+    function closeGcsModal() {
+        document.getElementById('gcsModal').classList.remove('show');
+    }
+
+    function calcGCS() {
+        const e = parseInt(document.getElementById('gcs_eye').value);
+        const v = parseInt(document.getElementById('gcs_verbal').value);
+        const m = parseInt(document.getElementById('gcs_motor').value);
+        const total = e + v + m;
+
+        let status = 'Compos Mentis';
+        if (total >= 14 && total <= 15) status = 'Compos Mentis';
+        else if (total >= 12 && total <= 13) status = 'Apatis';
+        else if (total >= 10 && total <= 11) status = 'Delirium';
+        else if (total >= 7 && total <= 9) status = 'Somnolen';
+        else if (total >= 5 && total <= 6) status = 'Sopor (Soporo Comatose)';
+        else if (total <= 4) status = 'Koma (Comatose)';
+
+        document.getElementById('gcs_display_val').innerText = `Hasil: GCS E${e}V${v}M${m} (${total}) - ${status}`;
+    }
+
+    function applyGcsResult() {
+        const e = parseInt(document.getElementById('gcs_eye').value);
+        const v = parseInt(document.getElementById('gcs_verbal').value);
+        const m = parseInt(document.getElementById('gcs_motor').value);
+        const total = e + v + m;
+        
+        let status = 'Compos Mentis';
+        if (total >= 14 && total <= 15) status = 'Compos Mentis';
+        else if (total >= 12 && total <= 13) status = 'Apatis';
+        else if (total >= 10 && total <= 11) status = 'Delirium';
+        else if (total >= 7 && total <= 9) status = 'Somnolen';
+        else if (total >= 5 && total <= 6) status = 'Sopor';
+        else if (total <= 4) status = 'Koma';
+
+        const outputGcs = `GCS E${e}V${v}M${m} (${total}) - ${status}`;
+        
+        // Tempelkan hasil ke field konsul_lainnya dan rujuk_kesadaran
+        document.getElementById('konsul_lainnya').value = outputGcs;
+        document.getElementById('rujuk_kesadaran').value = outputGcs;
+        
+        closeGcsModal();
+        syncAndDataHandle();
+        showToast("GCS berhasil diterapkan!");
     }
 </script>
 
 </body>
 </html>
+
+```
