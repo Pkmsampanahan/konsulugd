@@ -201,7 +201,7 @@
             text-overflow: ellipsis;
         }
         .vital-input-group input {
-            width: 100%; /* MEMPERBAIKI MASALAH OVERFLOW KELUAR LAYAR HP */
+            width: 100%;
             padding: 10px;
             font-size: 1rem;
             border: 1px solid #a1b0b9;
@@ -305,10 +305,25 @@
 
     <!-- DATA BERSAMA (SHARED FIELD) - Sinkron Otomatis antara kedua sistem -->
     <div class="section-title">Data Identitas Umum</div>
-    <div class="form-group">
-        <label for="shared_nama">Nama Pasien</label>
-        <input type="text" id="shared_nama" placeholder="Contoh: Tn. Ali" oninput="syncAndDataHandle()">
+    <div class="identity-row">
+        <div class="form-group">
+            <label for="shared_nama">Nama Pasien</label>
+            <input type="text" id="shared_nama" placeholder="Contoh: Tn. Ali" oninput="syncAndDataHandle()">
+        </div>
+        <div class="form-group">
+            <label for="shared_umur_angka">Umur</label>
+            <select id="shared_umur_angka" onchange="syncAndDataHandle()"></select>
+        </div>
+        <div class="form-group">
+            <label for="shared_umur_satuan">Satuan</label>
+            <select id="shared_umur_satuan" onchange="syncAndDataHandle()">
+                <option value="Thn">Thn</option>
+                <option value="Bln">Bln</option>
+                <option value="Hari">Hari</option>
+            </select>
+        </div>
     </div>
+    
     <div class="form-group">
         <label for="shared_keluhan">Keluhan Utama</label>
         <textarea id="shared_keluhan" placeholder="Tuliskan keluhan utama pasien secara lengkap..." oninput="syncAndDataHandle()"></textarea>
@@ -332,9 +347,13 @@
             <label for="shared_suhu">Suhu (°C)</label>
             <input type="text" id="shared_suhu" placeholder="36.5" oninput="syncAndDataHandle()">
         </div>
-        <div class="vital-input-group" style="grid-column: span 2;">
+        <div class="vital-input-group">
             <label for="shared_spo2">SpO2 (%)</label>
             <input type="text" id="shared_spo2" placeholder="98" oninput="syncAndDataHandle()">
+        </div>
+        <div class="vital-input-group">
+            <label for="shared_gds">GDS (mg/dL)</label>
+            <input type="text" id="shared_gds" placeholder="140" oninput="syncAndDataHandle()">
         </div>
     </div>
 
@@ -376,21 +395,6 @@
             </select>
         </div>
 
-        <div class="identity-row">
-            <div class="form-group">
-                <label for="rujuk_umur_angka">Umur</label>
-                <select id="rujuk_umur_angka" onchange="syncAndDataHandle()"></select>
-            </div>
-            <div class="form-group" style="grid-column: span 2;">
-                <label for="rujuk_umur_satuan">Satuan</label>
-                <select id="rujuk_umur_satuan" onchange="syncAndDataHandle()">
-                    <option value="Thn">Thn</option>
-                    <option value="Bln">Bln</option>
-                    <option value="Hari">Hari</option>
-                </select>
-            </div>
-        </div>
-
         <div class="form-group">
             <label for="rujuk_diagnosis">Diagnosis Kerja (Suspect)</label>
             <input type="text" id="rujuk_diagnosis" placeholder="Contoh: STEMI / Fraktur Femur" oninput="syncAndDataHandle()">
@@ -430,12 +434,12 @@
     
     // List element fields data untuk autosave localStorage
     const fields = [
-        'shared_nama', 'shared_keluhan', 'shared_td', 'shared_nadi', 'shared_rr', 'shared_suhu', 'shared_spo2',
-        'konsul_lainnya', 'rs_tujuan', 'rujuk_umur_angka', 'rujuk_umur_satuan', 'rujuk_diagnosis', 'rujuk_kesadaran', 'rujuk_terapi'
+        'shared_nama', 'shared_umur_angka', 'shared_umur_satuan', 'shared_keluhan', 'shared_td', 'shared_nadi', 'shared_rr', 'shared_suhu', 'shared_spo2', 'shared_gds',
+        'konsul_lainnya', 'rs_tujuan', 'rujuk_diagnosis', 'rujuk_kesadaran', 'rujuk_terapi'
     ];
 
     // Generate pilihan nomor umur (0 - 100)
-    const selectUmur = document.getElementById('rujuk_umur_angka');
+    const selectUmur = document.getElementById('shared_umur_angka');
     for (let i = 0; i <= 100; i++) {
         let opt = document.createElement('option');
         opt.value = i;
@@ -447,7 +451,7 @@
     // Load data lama dari LocalStorage saat dimuat pertama kali
     window.addEventListener('DOMContentLoaded', () => {
         fields.forEach(field => {
-            const savedValue = localStorage.getItem('asisten_ugd_v1_' + field);
+            const savedValue = localStorage.getItem('asisten_ugd_v2_' + field);
             if (savedValue) {
                 document.getElementById(field).value = savedValue;
             }
@@ -492,7 +496,7 @@
     // Trigger update data & simpan otomatis ke browser penyimpanan lokal
     function syncAndDataHandle() {
         fields.forEach(field => {
-            localStorage.setItem('asisten_ugd_v1_' + field, document.getElementById(field).value);
+            localStorage.setItem('asisten_ugd_v2_' + field, document.getElementById(field).value);
         });
         updatePreview();
     }
@@ -512,33 +516,39 @@
     function generateTemplate() {
         // Data Bersama (Shared)
         const nama = document.getElementById('shared_nama').value.trim() || '-';
+        const umurAngka = document.getElementById('shared_umur_angka').value;
+        const umurSatuan = document.getElementById('shared_umur_satuan').value;
         const keluhan = document.getElementById('shared_keluhan').value.trim() || '-';
+        
         const td = document.getElementById('shared_td').value.trim();
         const nadi = document.getElementById('shared_nadi').value.trim();
         const rr = document.getElementById('shared_rr').value.trim();
         const suhu = document.getElementById('shared_suhu').value.trim();
         const spo2 = document.getElementById('shared_spo2').value.trim();
+        const gds = document.getElementById('shared_gds').value.trim();
+
+        let kondisiArr = [];
+        if (td) kondisiArr.push(`TD ${td} mmHg`);
+        if (nadi) kondisiArr.push(`Nadi ${nadi} x/m`);
+        if (rr) kondisiArr.push(`RR ${rr} x/m`);
+        if (suhu) kondisiArr.push(`Suhu ${suhu} °C`);
+        if (spo2) kondisiArr.push(`SpO2 ${spo2}%`);
+        if (gds) kondisiArr.push(`GDS ${gds} mg/dL`);
 
         if (activeTab === 'konsul') {
-            // Pemrosesan teks format KONSUL DOKTER UGD
+            // Pemrosesan teks format KONSUL DOKTER UGD (Sudah termasuk umur)
             const lainnya = document.getElementById('konsul_lainnya').value.trim();
-            let kondisiArr = [];
-            if (td) kondisiArr.push(`TD ${td} mmHg`);
-            if (nadi) kondisiArr.push(`Nadi ${nadi} x/m`);
-            if (rr) kondisiArr.push(`RR ${rr} x/m`);
-            if (suhu) kondisiArr.push(`Suhu ${suhu} °C`);
-            if (spo2) kondisiArr.push(`SpO2 ${spo2}%`);
             if (lainnya) kondisiArr.push(lainnya);
 
-            const kondisiText = kondisiArr.length > 0 ? kondisiArr.join(', ') : '-';
+            const kondisiText = kondisiArr.length > 0 ? kondisiArr.join(',\n') : '-';
 
             return `Dok, izin konsul pasien UGD:
 ` +
-                   `*Nama:* ${nama}
+                   `*Nama / Usia:* ${nama} / ${umurAngka} ${umurSatuan}
 ` +
                    `*Keluhan:* ${keluhan}
 ` +
-                   `*Kondisi saat ini:* ${kondisiText}
+                   `*Kondisi saat ini:* \n${kondisiText}
 
 ` +
                    `Mohon saran dan arahannya, Dok. Terima kasih.`;
@@ -546,20 +556,11 @@
         } else {
             // Pemrosesan teks format RUJUKAN RUMAH SAKIT
             const rs = document.getElementById('rs_tujuan').value || '...';
-            const umurAngka = document.getElementById('rujuk_umur_angka').value;
-            const umurSatuan = document.getElementById('rujuk_umur_satuan').value;
             const diag = document.getElementById('rujuk_diagnosis').value.trim() || '-';
             const kesadaran = document.getElementById('rujuk_kesadaran').value.trim() || '-';
             const terapi = document.getElementById('rujuk_terapi').value.trim() || '-';
 
-            let kondisiArr = [];
-            if (td) kondisiArr.push(`TD ${td} mmHg`);
-            if (nadi) kondisiArr.push(`Nadi ${nadi} x/m`);
-            if (rr) kondisiArr.push(`RR ${rr} x/m`);
-            if (suhu) kondisiArr.push(`Suhu ${suhu} °C`);
-            if (spo2) kondisiArr.push(`SpO2 ${spo2}%`);
-
-            const vitalsText = kondisiArr.length > 0 ? kondisiArr.join(' | ') : '-';
+            const vitalsText = kondisiArr.length > 0 ? kondisiArr.join(',\n') : '-';
             const waktuStamp = getWaktuSekarang();
 
             return `*IZIN RUJUKAN PASIEN UGD PUSKESMAS*
@@ -581,7 +582,7 @@
 ` +
                    `- Kesadaran: ${kesadaran}
 ` +
-                   `- Tanda Vital: ${vitalsText}
+                   `- Tanda Vital: \n${vitalsText}
 
 ` +
                    `*Tindakan/Terapi di UGD:*
@@ -607,10 +608,10 @@ ${terapi}
     function resetForm() {
         if(confirm("Apakah Anda yakin ingin membersihkan data seluruh isian formulir?")) {
             fields.forEach(field => {
-                if(field === 'rujuk_umur_angka') document.getElementById(field).value = '30';
-                else if(field === 'rujuk_umur_satuan') document.getElementById(field).value = 'Thn';
+                if(field === 'shared_umur_angka') document.getElementById(field).value = '30';
+                else if(field === 'shared_umur_satuan') document.getElementById(field).value = 'Thn';
                 else document.getElementById(field).value = '';
-                localStorage.removeItem('asisten_ugd_v1_' + field);
+                localStorage.removeItem('asisten_ugd_v2_' + field);
             });
             updatePreview();
             showToast("Semua data dibersihkan!");
